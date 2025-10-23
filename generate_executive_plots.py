@@ -598,6 +598,9 @@ def generate_prediction_plots():
     # Rotate the tick labels
     plt.setp(ax.get_xticklabels(), rotation=0, ha="center")
     
+    # Remove grid lines
+    ax.grid(False)
+    
     # Add text annotations
     thresh = cm.max() / 2.
     for i in range(cm.shape[0]):

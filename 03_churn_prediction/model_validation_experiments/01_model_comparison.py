@@ -353,7 +353,33 @@ for idx, metric in enumerate(metrics):
     # Rotate x-axis labels
     ax.tick_params(axis='x', rotation=45)
 
+# Fill the empty subplot with a ranking summary table
+ax = axes[1, 2]
+ax.axis('off')
+
+# Create ranking summary
+ranking_data = []
+for model in comparison_df['Model']:
+    wins = 0
+    for metric in metrics:
+        if comparison_df.loc[comparison_df['Model'] == model, metric].values[0] == comparison_df[metric].max():
+            wins += 1
+    ranking_data.append({'Model': model, 'Wins': wins})
+
+ranking_df = pd.DataFrame(ranking_data).sort_values('Wins', ascending=False)
+
+# Create table
+table_text = "Ranking Summary\n\n"
+for idx, row in ranking_df.iterrows():
+    table_text += f"{row['Model']}: {row['Wins']}/5 metrics\n"
+
+ax.text(0.5, 0.5, table_text, ha='center', va='center', 
+        fontsize=12, fontweight='bold', family='monospace',
+        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+ax.set_title('Best Model Ranking', fontsize=14, fontweight='bold', pad=15)
+
 plt.tight_layout()
+plt.savefig('executive_summary_assets/24_model_comparison_metrics.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 # %% [markdown]

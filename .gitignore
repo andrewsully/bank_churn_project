@@ -87,3 +87,37 @@ dmypy.json
 
 # Specific files to ignore
 example2_analysis.ipynb
+
+# LaTeX compilation artifacts (keep .tex, .bib, .pdf)
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+latex_report/*.aux
+latex_report/*.log
+latex_report/*.out
+latex_report/*.toc
+latex_report/*.bbl
+latex_report/*.blg
+latex_report/*.synctex.gz
+latex_report/*.fdb_latexmk
+latex_report/*.fls
+latex_report/*.lof
+latex_report/*.lot
+
+# LaTeX source files to ignore
+latex_report/Customer churn analysis sources.docx
+latex_report/report.aux
+latex_report/report.log
+latex_report/report.out
+latex_report/report.toc
+latex_report/report.bbl
+latex_report/report.blg
+latex_report/report.synctex.gz

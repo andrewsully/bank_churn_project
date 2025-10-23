@@ -1,0 +1,21 @@
+# Core
+numpy~=1.26.4
+pandas~=2.2.2
+scikit-learn~=1.5.2
+scipy~=1.13.1
+matplotlib~=3.9.0
+joblib>=1.3,<2
+seaborn~=0.13.2
+
+# Modeling & explainability
+imbalanced-learn~=0.14.0       # compatible with sklearn 1.4–1.5
+shap~=0.45.0                   # modern SHAP, works with numpy 1.26
+lifelines~=0.27.8
+statsmodels~=0.14.2
+
+# Notebooks
+ipython>=8.0,<9
+
+# Notebooks / rendering helpers
+Jinja2~=3.1.4        # needed by pandas Styler & lifelines' Printer
+# (no need to pin markupsafe explicitly; Jinja2 3.1 pulls a compatible version)

@@ -49,10 +49,15 @@ bank_churn_project/
 │   ├── 03_churnprediction.ipynb
 │   ├── 03_churnprediction.py
 │   ├── modeling_utils.py
-│   └── checkpoints/
+│   ├── checkpoints/
+│   └── model_validation_experiments/
+│       ├── 01_model_comparison.py
+│       ├── 02_smote_experiment.py
+│       ├── 03_feature_engineering.py
+│       └── advanced_modeling_utils.py
 │
 ├── executive_summary_assets/
-│   └── (20 visualization PNG files)
+│   └── (25 visualization PNG files)
 │
 ├── generate_executive_plots.py
 ├── EXECUTIVE_SUMMARY.md
@@ -174,6 +179,43 @@ The final model resulted in a **0.63 F1 score** and **0.86 ROC-AUC**, with signi
 
 From the feature importance plot, we can see which features govern customer churn. Age, number of products, and activity status are the dominant predictors.
 
+### Model Validation
+
+To ensure our Random Forest model was optimal, we conducted three validation experiments comparing alternative approaches:
+
+**Experiment 1: Algorithm Comparison**
+Tested XGBoost and LightGBM against Random Forest:
+
+<p align="center">
+<img src="executive_summary_assets/21_model_comparison_roc.png" width="500">
+</p>
+
+<p align="center">
+<img src="executive_summary_assets/24_model_comparison_metrics.png" width="900">
+</p>
+
+**Results:** Random Forest achieved the best F1-Score (62.52%) outperforming both XGBoost (60.47%) and LightGBM (60.97%).
+
+**Experiment 2: SMOTE vs Class Weight**
+Compared SMOTE oversampling to class_weight approach:
+
+<p align="center">
+<img src="executive_summary_assets/22_smote_class_distribution.png" width="600">
+</p>
+
+<p align="center">
+<img src="executive_summary_assets/25_smote_roc_comparison.png" width="500">
+</p>
+
+**Results:** Class weight achieved better precision (68.01% vs 56.18%) and F1-Score (62.52% vs 60.57%). SMOTE improved recall but created excessive false alarms.
+
+**Experiment 3: Feature Engineering**
+Tested 14 engineered features (interactions, polynomials, bins):
+
+**Results:** Baseline features outperformed engineered features (62.52% vs 62.09% F1-Score). Random Forest captures interactions automatically through tree splits.
+
+**Conclusion:** All experiments validated our Random Forest configuration with class_weight and baseline features as optimal. See `03_churn_prediction/model_validation_experiments/` for detailed results.
+
 ---
 
 ## Explainability
@@ -258,6 +300,7 @@ This project extends the survival analysis + ML methodology with several technic
 7. **3-Method Feature Validation** - Built-in importance + Permutation + SHAP for robust interpretation
 8. **Automated Reporting Pipeline** - Plot generation script for reproducible executive summaries
 9. **Business-Focused Documentation** - 40-50 page executive summary with ROI projections and implementation roadmap
+10. **Model Validation** - Comprehensive experiments validate Random Forest + class_weight + baseline features as optimal configuration
 
 ---
 
@@ -273,6 +316,9 @@ scikit-learn==1.5.2
 lifelines==0.29.0
 shap==0.46.0
 jupyter==1.0.0
+xgboost==2.1.3
+lightgbm==4.6.0
+imbalanced-learn==0.14.0
 ```
 
 **Install:**

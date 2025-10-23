@@ -85,3 +85,5 @@ htmlcov/
 .dmypy.json
 dmypy.json
 
+# Specific files to ignore
+example2_analysis.ipynb

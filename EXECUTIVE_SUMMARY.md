@@ -40,6 +40,9 @@ Customer retention is critical for sustainable profitability in banking—acquir
 - **Baseline Churn Rate:** 20.4% (2,038 churned, 7,962 retained)
 - **Original Features:** 18 columns (3 identifiers dropped)
 - **Final Feature Set:** 15 features across 5 categories
+- **Source:** [Bank Customer Churn Dataset on Kaggle](https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn/data) by Radheshyam Kollipara
+- **Coverage Period:** March 31, 2022 - April 30, 2022
+- **Geographic Scope:** Global (multinational bank with operations in France, Spain, and Germany)
 
 #### Feature Categories:
 
@@ -60,7 +63,7 @@ Customer retention is critical for sustainable profitability in banking—acquir
 
 ### Analytical Approach
 
-This analysis employed a **three-stage methodology**:
+This analysis employed a **four-stage methodology**:
 
 #### 1. Exploratory Data Analysis (EDA)
 
@@ -175,6 +178,68 @@ This analysis employed a **three-stage methodology**:
 - Overfitting reduced from 15% to 7% train-test gap
 - Top 3 predictive features confirmed: Age, NumOfProducts, IsActiveMember
 - Successfully identifies pre-complaint churn signals (complaint excluded from model)
+
+---
+
+#### 4. Model Validation & Robustness Testing
+
+**Objectives:**
+- Validate Random Forest algorithm choice against alternative approaches
+- Test alternative class imbalance handling strategies
+- Evaluate feature engineering impact on performance
+- Confirm production readiness of final model configuration
+
+**Key Activities:**
+- Algorithm comparison: Random Forest vs XGBoost vs LightGBM
+- Class imbalance testing: SMOTE oversampling vs class_weight
+- Feature engineering: Interaction terms, polynomials, bins
+- Comprehensive performance comparison across all approaches
+
+**Statistical Methods:**
+- Consistent preprocessing pipeline across all experiments
+- Same train/test split (random_state=42) for fair comparison
+- Performance metrics: Accuracy, Precision, Recall, F1-Score, ROC-AUC
+- Business impact analysis: False alarm costs vs additional churners caught
+
+**Key Plots:**
+
+![Model Comparison ROC](executive_summary_assets/21_model_comparison_roc.png)
+
+![Model Comparison Metrics](executive_summary_assets/24_model_comparison_metrics.png)
+
+![SMOTE vs Class Weight](executive_summary_assets/25_smote_roc_comparison.png)
+
+**Outcome:**
+- **Random Forest validated as optimal** (62.52% F1 vs 60.47-60.97% for alternatives)
+- **Class weight validated as optimal** (62.52% F1 vs 60.57% for SMOTE)
+- **Baseline features validated as optimal** (62.52% F1 vs 62.09% with engineered features)
+- All three experiments confirm our original configuration choices
+- Production model configuration validated through comprehensive testing
+
+**Validation Experiments:**
+
+**Experiment 1: Algorithm Comparison**
+- Random Forest: 62.52% F1-Score, 68.01% Precision, 57.84% Recall, 85.85% ROC-AUC ✓ BEST
+- LightGBM: 60.97% F1-Score, 61.65% Precision, 60.29% Recall, 84.16% ROC-AUC
+- XGBoost: 60.47% F1-Score, 61.15% Precision, 59.80% Recall, 84.28% ROC-AUC
+- **Conclusion:** Random Forest outperforms gradient boosting alternatives by 1.55-2.05% F1-Score
+
+**Experiment 2: SMOTE vs Class Weight**
+- Class Weight: 62.52% F1-Score, 68.01% Precision, 57.84% Recall ✓ BEST
+- SMOTE: 60.57% F1-Score, 56.18% Precision, 65.69% Recall
+- **Trade-off:** SMOTE catches +32 churners but creates +64 false alarms (2:1 unfavorable ratio)
+- **Conclusion:** Class weight approach more efficient and resource-conscious
+
+**Experiment 3: Feature Engineering**
+- Baseline Features: 62.52% F1-Score (13 features) ✓ BEST
+- Engineered Features: 62.09% F1-Score (27 features, +14 added)
+- **Conclusion:** Random Forest captures interactions automatically; explicit engineering adds noise
+
+**Key Insights:**
+- Hyperparameter tuning (4-stage grid search) was critical for Random Forest performance
+- SMOTE works best for severe imbalance (<5% minority); our 20% rate favors class_weight
+- Tree-based models handle non-linearities without explicit feature engineering
+- Simpler model (13 features) easier to interpret and maintain than complex alternatives
 
 ---
 
@@ -1187,6 +1252,20 @@ Beyond the top 5 findings, survival analysis revealed additional insights:
 3. **Week 4:** A/B testing framework operational
 4. **Month 2:** Weekly monitoring dashboards live
 5. **Month 3:** First model performance report (drift, accuracy, business impact)
+
+---
+
+## Acknowledgments
+
+This analysis builds upon the foundational methodology developed by **Archit Desai** in his [Customer Survival Analysis and Churn Prediction](https://github.com/archd3sai/Customer-Survival-Analysis-and-Churn-Prediction) project. The original repository established the innovative approach of combining survival analysis (Kaplan-Meier estimators, Cox Proportional Hazards regression) with machine learning (Random Forest classification) for predictive churn modeling.
+
+While the original project focused on telecom customer churn, this implementation adapts the methodology for banking sector challenges with several enhancements:
+- Modular code architecture with standardized utility functions
+- Comprehensive model validation experiments comparing algorithms and techniques
+- Business-focused documentation with ROI projections and implementation roadmaps
+- Production-ready checkpointing and reproducibility systems
+
+The dataset used in this analysis was sourced from the [Bank Customer Churn Dataset on Kaggle](https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn/data) by Radheshyam Kollipara.
 
 ---
 

@@ -5,11 +5,33 @@ These plots show only the curves without embedded tables.
 
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
 from lifelines import KaplanMeierFitter
 import sys
 import os
+import seaborn as sns
+
+# Configure plotting - Reset to plain matplotlib style
+sns.reset_orig()
+plt.style.use('default')
+
+# Set rcParams for LaTeX report plots
+plt.rcParams['figure.dpi'] = 300
+plt.rcParams['savefig.dpi'] = 300
+plt.rcParams['savefig.bbox'] = 'tight'
+plt.rcParams['figure.facecolor'] = 'white'
+plt.rcParams['axes.facecolor'] = 'white'
+plt.rcParams['axes.edgecolor'] = 'black'
+plt.rcParams['axes.linewidth'] = 1.0
+plt.rcParams['axes.grid'] = False
+plt.rcParams['xtick.color'] = 'black'
+plt.rcParams['ytick.color'] = 'black'
+plt.rcParams['xtick.direction'] = 'out'
+plt.rcParams['ytick.direction'] = 'out'
+plt.ioff()
 
 # Add parent directory to path to import utils
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '02_survival_analysis'))
@@ -121,9 +143,12 @@ ax.set_xlabel("Tenure (months)", fontsize=12, fontweight="semibold")
 ax.set_ylabel("Survival Probability", fontsize=12, fontweight="semibold")
 ax.set_ylim(0, 1.0)
 ax.yaxis.set_major_locator(MultipleLocator(0.1))
-ax.grid(axis="y", linestyle="--", alpha=0.25)
-for s in ("top", "right"):
-    ax.spines[s].set_visible(False)
+
+# Ensure all spines are visible and black
+for spine in ax.spines.values():
+    spine.set_visible(True)
+    spine.set_color('black')
+
 ax.set_title("Overall Survival Curve", fontsize=14, fontweight="bold", pad=10)
 plt.tight_layout()
 plt.savefig('img/09_overall_survival_curve_plot.png', dpi=300, bbox_inches='tight')

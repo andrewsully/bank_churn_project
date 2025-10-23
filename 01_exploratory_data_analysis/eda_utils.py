@@ -23,8 +23,8 @@ from matplotlib.patches import Patch
 # COLOR SCHEME CONSTANTS
 # ============================================================================
 
-NO_CHURN = "#66BB6A"   # vibrant green (better contrast)
-CHURN = "#EF5350"      # vibrant red (better contrast)
+NO_CHURN = "#55A868"   # green for non-churned customers
+CHURN = "#C44E52"      # red for churned customers
 
 
 # ============================================================================

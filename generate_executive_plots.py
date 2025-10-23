@@ -20,11 +20,23 @@ from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
-# Configure plotting
-sns.set_style('darkgrid')
+# Configure plotting - Reset to plain matplotlib style
+sns.reset_orig()
+plt.style.use('default')
+
+# Set rcParams for LaTeX report plots
 plt.rcParams['figure.dpi'] = 300  # High quality for reports
 plt.rcParams['savefig.dpi'] = 300
 plt.rcParams['savefig.bbox'] = 'tight'
+plt.rcParams['figure.facecolor'] = 'white'
+plt.rcParams['axes.facecolor'] = 'white'
+plt.rcParams['axes.edgecolor'] = 'black'
+plt.rcParams['axes.linewidth'] = 1.0
+plt.rcParams['axes.grid'] = False
+plt.rcParams['xtick.color'] = 'black'
+plt.rcParams['ytick.color'] = 'black'
+plt.rcParams['xtick.direction'] = 'out'
+plt.rcParams['ytick.direction'] = 'out'
 plt.ioff()  # Turn off interactive mode
 
 # Output directory
@@ -92,19 +104,23 @@ def generate_eda_plots(df):
     churn_counts = df['exited'].value_counts()
     churn_pct = df['exited'].value_counts(normalize=True) * 100
     
-    colors = ['#2ecc71', '#e74c3c']  # Green for retained, red for churned
+    colors = ['#55A868', '#C44E52']  # Green for retained, red for churned
     bars = ax.bar(['Retained', 'Churned'], churn_counts.values, color=colors, alpha=0.8, edgecolor='black')
     
-    # Add percentage labels
+    # Add percentage labels inside bars
     for i, (bar, pct) in enumerate(zip(bars, churn_pct.values)):
         height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height,
+        # Position text in the middle of the bar (half the height)
+        ax.text(bar.get_x() + bar.get_width()/2., height/2,
                 f'{int(height):,}\n({pct:.1f}%)',
-                ha='center', va='bottom', fontsize=12, fontweight='bold')
+                ha='center', va='center', fontsize=12, fontweight='bold', color='white')
     
     ax.set_ylabel('Number of Customers', fontsize=12, fontweight='bold')
     ax.set_title('Overall Customer Churn Distribution', fontsize=14, fontweight='bold', pad=15)
-    ax.grid(axis='y', alpha=0.3)
+    # Ensure all spines are visible and black
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / '01_overall_churn_rate.png')
     plt.close()
@@ -129,7 +145,6 @@ def generate_eda_plots(df):
     axes[0].set_ylabel('Count', fontsize=12, fontweight='bold')
     axes[0].set_title('Age Distribution by Churn Status', fontsize=13, fontweight='bold')
     axes[0].legend()
-    axes[0].grid(alpha=0.3)
     
     # Churn rate by age group
     age_churn = df.groupby('age_group')['exited'].agg(['sum', 'count'])
@@ -140,7 +155,6 @@ def generate_eda_plots(df):
     axes[1].set_xlabel('Age Group', fontsize=12, fontweight='bold')
     axes[1].set_ylabel('Churn Rate (%)', fontsize=12, fontweight='bold')
     axes[1].set_title('Churn Rate by Age Group', fontsize=13, fontweight='bold')
-    axes[1].grid(axis='y', alpha=0.3)
     axes[1].tick_params(axis='x', rotation=45)
     
     # Add value labels
@@ -148,6 +162,12 @@ def generate_eda_plots(df):
         height = bar.get_height()
         axes[1].text(bar.get_x() + bar.get_width()/2., height,
                      f'{height:.1f}%', ha='center', va='bottom', fontweight='bold')
+    
+    # Ensure all spines are visible and black for both subplots
+    for ax in axes:
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
     
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / '03_age_distribution_churn.png')
@@ -158,34 +178,53 @@ def generate_eda_plots(df):
     print("\n📊 Generating: 04_products_churn_analysis.png")
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     
+    # Diverging U-shape palette for products
+    product_colors = {1: '#2C7BB6', 2: '#ABD9E9', 3: '#F4A261', 4: '#D1495B'}
+    
     # Distribution
     product_counts = df['numofproducts'].value_counts().sort_index()
-    axes[0].bar(product_counts.index, product_counts.values, 
-                color='#3498db', alpha=0.8, edgecolor='black')
+    
+    bars_dist = axes[0].bar(range(len(product_counts)), product_counts.values, 
+                            alpha=0.8, edgecolor='black', width=0.8)
+    # Set individual bar colors
+    for i, (bar, idx) in enumerate(zip(bars_dist, product_counts.index)):
+        color = product_colors.get(int(idx), '#2C7BB6')
+        bar.set_color(color)
     axes[0].set_xlabel('Number of Products', fontsize=12, fontweight='bold')
     axes[0].set_ylabel('Number of Customers', fontsize=12, fontweight='bold')
     axes[0].set_title('Distribution of Products per Customer', fontsize=13, fontweight='bold')
+    axes[0].set_xticks(range(len(product_counts)))
+    axes[0].set_xticklabels([int(x) for x in product_counts.index])
     axes[0].grid(axis='y', alpha=0.3)
     
     for i, v in enumerate(product_counts.values):
-        axes[0].text(product_counts.index[i], v, f'{v:,}', 
+        axes[0].text(i, v, f'{v:,}', 
                      ha='center', va='bottom', fontweight='bold')
     
     # Churn rate by products
     product_churn = df.groupby('numofproducts')['exited'].agg(['sum', 'count'])
     product_churn['churn_rate'] = (product_churn['sum'] / product_churn['count'] * 100)
     
-    colors_products = ['#3498db', '#2ecc71', '#e74c3c', '#e74c3c']
-    bars = axes[1].bar(product_churn.index, product_churn['churn_rate'], 
-                       color=colors_products[:len(product_churn)], alpha=0.8, edgecolor='black')
+    bars = axes[1].bar(range(len(product_churn)), product_churn['churn_rate'], 
+                       alpha=0.8, edgecolor='black', width=0.8)
+    # Set individual bar colors
+    for i, (bar, idx) in enumerate(zip(bars, product_churn.index)):
+        color = product_colors.get(int(idx), '#2C7BB6')
+        bar.set_color(color)
     axes[1].set_xlabel('Number of Products', fontsize=12, fontweight='bold')
     axes[1].set_ylabel('Churn Rate (%)', fontsize=12, fontweight='bold')
     axes[1].set_title('Churn Rate by Number of Products (U-Shape)', fontsize=13, fontweight='bold')
-    axes[1].grid(axis='y', alpha=0.3)
+    axes[1].set_xticks(range(len(product_churn)))
+    axes[1].set_xticklabels([int(x) for x in product_churn.index])
+    # Ensure all spines are visible and black for both subplots
+    for ax in axes:
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
     
-    for bar in bars:
+    for i, bar in enumerate(bars):
         height = bar.get_height()
-        axes[1].text(bar.get_x() + bar.get_width()/2., height,
+        axes[1].text(i, height,
                      f'{height:.1f}%', ha='center', va='bottom', fontweight='bold')
     
     plt.tight_layout()
@@ -195,7 +234,7 @@ def generate_eda_plots(df):
     
     # Plot 5: Active Member Status
     print("\n📊 Generating: 05_active_member_impact.png")
-    stacked_plot(df, 'isactivemember', 'exited')
+    stacked_plot(df, 'isactivemember', 'exited', show_legend=True)
     plt.suptitle('Active Member Status Impact on Churn', fontsize=14, fontweight='bold', y=1.02)
     plt.savefig(OUTPUT_DIR / '05_active_member_impact.png')
     plt.close()
@@ -203,7 +242,7 @@ def generate_eda_plots(df):
     
     # Plot 6: Geography Impact
     print("\n📊 Generating: 06_geography_churn.png")
-    stacked_plot(df, 'geography', 'exited')
+    stacked_plot(df, 'geography', 'exited', show_legend=True)
     plt.suptitle('Geographic Distribution and Churn Rates', fontsize=14, fontweight='bold', y=1.02)
     plt.savefig(OUTPUT_DIR / '06_geography_churn.png')
     plt.close()
@@ -233,7 +272,10 @@ def generate_eda_plots(df):
     ax.set_title('Complaint Status: The Dominant Churn Predictor', 
                  fontsize=15, fontweight='bold', pad=15)
     ax.set_ylim(0, 105)
-    ax.grid(axis='y', alpha=0.3)
+    # Ensure all spines are visible and black
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
     
     # Add annotation
     ax.annotate(f'{churn_rates[1]/churn_rates[0]:.0f}× Higher Churn Rate!',
@@ -274,6 +316,12 @@ def generate_eda_plots(df):
                 vmin=-1, vmax=1, ax=ax)
     ax.set_title('Feature Correlation Heatmap (Top 12 + Churn)', 
                  fontsize=14, fontweight='bold', pad=15)
+    
+    # Ensure all spines are visible and black
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / '08_correlation_heatmap.png')
     plt.close()
@@ -455,7 +503,10 @@ def generate_survival_plots(df):
                  fontsize=14, fontweight='bold')
     ax.set_xlabel('Hazard Ratio (log scale)', fontsize=12, fontweight='bold')
     ax.axvline(x=1, color='red', linestyle='--', linewidth=1.5, alpha=0.5)
-    ax.grid(True, alpha=0.3)
+    # Ensure all spines are visible and black
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / '14_cox_ph_coefficients.png')
     plt.close()
@@ -569,7 +620,11 @@ def generate_prediction_plots():
     ax2.invert_yaxis()
     ax2.set_xlabel('Permutation Importance', fontweight='bold', fontsize=11)
     ax2.set_title('Permutation Feature Importance', fontweight='bold', fontsize=13)
-    ax2.grid(axis='x', alpha=0.3)
+    # Ensure all spines are visible and black for both subplots
+    for ax in [ax1, ax2]:
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
     
     plt.suptitle('Feature Importance: Built-in vs Permutation', 
                  fontsize=15, fontweight='bold', y=0.98)
@@ -631,7 +686,10 @@ def generate_prediction_plots():
     ax.set_ylabel('True Positive Rate', fontweight='bold', fontsize=12)
     ax.set_title('ROC Curve - Churn Prediction Model', fontsize=14, fontweight='bold', pad=15)
     ax.legend(loc="lower right", fontsize=11)
-    ax.grid(alpha=0.3)
+    # Ensure all spines are visible and black
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / '17_roc_curve.png')
     plt.close()
@@ -640,17 +698,51 @@ def generate_prediction_plots():
     # Plot 4: Partial Dependence - Age
     print("\n📊 Generating: 18_pdp_age.png")
     
+    # Use same logic as quick_pdp function for better formatting
     fig, ax = plt.subplots(figsize=(10, 6))
-    PartialDependenceDisplay.from_estimator(
-        model, X_test, ['age'],
-        kind='average',
-        ax=ax,
-        grid_resolution=50
-    )
-    ax.set_title('Partial Dependence Plot: Age', fontsize=14, fontweight='bold', pad=15)
-    ax.set_ylabel('Partial Dependence (Churn Probability)', fontweight='bold', fontsize=11)
+    
+    # Create grid for continuous feature
+    xraw = X_test['age'].to_numpy()
+    qs = np.linspace(0.01, 0.99, 30)
+    grid = np.quantile(xraw, qs)
+    
+    pdp_vals = []
+    ice_rows = []
+    for v in grid:
+        tmp = X_test.copy()
+        tmp['age'] = v
+        proba = model.predict_proba(tmp)[:, 1]
+        ice_rows.append(proba)
+        pdp_vals.append(proba.mean())
+    
+    pdp_vals = np.array(pdp_vals)
+    ice = np.array(ice_rows)
+    
+    # Center the PDP
+    y_main = pdp_vals - pdp_vals[0]
+    ice_center = ice - ice[0, :]
+    ci = ice_center.std(axis=1)
+    
+    # Plot with confidence intervals
+    ax.fill_between(grid, y_main - ci, y_main + ci, alpha=0.25, label="±1 std")
+    ax.plot(grid, y_main, lw=2.5, label="Mean PDP")
+    ax.axhline(0, color="black", ls="--", lw=1, alpha=0.6)
+    
+    # Formatting
+    ax.set_title('PDP: Customer Age (Lifecycle Pattern)', fontsize=13, fontweight='bold', pad=25)
+    ax.text(0.5, 1.02, "Change in churn probability vs baseline. Shaded = ±1 SD", 
+            transform=ax.transAxes, ha="center", va="bottom", fontsize=9, color="dimgray", style='italic')
+    ax.set_ylabel("Δ Predicted Probability (centered)", fontweight='bold', fontsize=11)
     ax.set_xlabel('Age (years)', fontweight='bold', fontsize=11)
-    plt.tight_layout()
+    ax.legend(loc="best", frameon=True, fontsize=10)
+    ax.grid(alpha=0.3)
+    
+    # Ensure all spines are visible and black
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.savefig(OUTPUT_DIR / '18_pdp_age.png')
     plt.close()
     print("✓ Saved: 18_pdp_age.png")
@@ -670,6 +762,10 @@ def generate_prediction_plots():
     ax.set_ylabel('Partial Dependence (Churn Probability)', fontweight='bold', fontsize=11)
     ax.set_xlabel('Number of Products', fontweight='bold', fontsize=11)
     ax.set_xticks([1, 2, 3, 4])
+    # Ensure all spines are visible and black
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / '19_pdp_numofproducts.png')
     plt.close()
@@ -690,14 +786,123 @@ def generate_prediction_plots():
                          feature_names=feature_cols, show=False)
         plt.title('SHAP Summary: Feature Impact on Churn Prediction', 
                  fontsize=14, fontweight='bold', pad=15)
+        # Ensure all spines are visible and black
+        ax = plt.gca()
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
         plt.tight_layout()
         plt.savefig(OUTPUT_DIR / '20_shap_summary.png')
         plt.close()
         print("✓ Saved: 20_shap_summary.png")
+        
+        # Plot 7: SHAP Waterfall with Customer Details
+        print("\n📊 Generating: 26_shap_waterfall.png")
+        
+        # Select customer to explain (customer index 0)
+        customer_idx = 0
+        
+        # Get customer data and actual outcome
+        customer_actual = y_test.iloc[customer_idx]
+        customer_pred_proba = model.predict_proba(X_test_sample.iloc[[customer_idx]])[0, 1]
+        
+        # Get SHAP explainer and base value
+        shap_explainer_path = Path('03_churn_prediction/shap_explainer.bz2')
+        if shap_explainer_path.exists():
+            import joblib
+            explainer = joblib.load(shap_explainer_path)
+        else:
+            # Create explainer if it doesn't exist
+            explainer = shap.TreeExplainer(model)
+        
+        # Extract base value
+        if isinstance(explainer.expected_value, (list, np.ndarray)) and len(explainer.expected_value) > 1:
+            base_value = explainer.expected_value[1]  # Churn class
+        else:
+            base_value = explainer.expected_value if not isinstance(explainer.expected_value, (list, np.ndarray)) else explainer.expected_value[0]
+        
+        # Get top 5 features
+        customer_shap = shap_values_churn[customer_idx]
+        customer_features = X_test_sample.iloc[customer_idx]
+        top_shap_idx = np.argsort(np.abs(customer_shap))[-5:][::-1]
+        
+        # Create figure with waterfall plot spanning full width
+        fig = plt.figure(figsize=(20, 5))
+        
+        # Main title and subtitle
+        fig.suptitle('SHAP Waterfall Plot - Individual Customer Explanation', 
+                    fontsize=16, fontweight='bold', y=0.97)
+        fig.text(0.5, 0.93, 'Shows how each feature contributed to the model\'s prediction for this specific customer.\n'
+                            'Red bars increase churn risk, blue bars decrease risk. Starts at average (base) and ends at final prediction.',
+                ha='center', va='top', fontsize=11, style='italic', color='dimgray')
+        
+        # Main subplot: Waterfall plot spanning full width
+        ax1 = fig.add_subplot(111)
+        plt.sca(ax1)  # Set current axes
+        shap.waterfall_plot(
+            shap.Explanation(
+                values=shap_values_churn[customer_idx],
+                base_values=base_value,
+                data=X_test_sample.iloc[customer_idx].values,
+                feature_names=feature_cols
+            ),
+            show=False
+        )
+        ax1.set_title('', fontsize=12, fontweight='bold', pad=30)
+        # Add more padding around the plot area
+        # ax1.margins(x=0.15, y=0.25)
+        # Reduce font sizes for axis labels
+        ax1.tick_params(axis='y', labelsize=8)
+        ax1.tick_params(axis='x', labelsize=8)
+        # Ensure all spines are visible and black
+        for spine in ax1.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
+            spine.set_linewidth(1.0)
+        
+        # # Customer details as compact text below the plot
+        # churn_status = 'WILL CHURN' if customer_pred_proba > 0.5 else 'WILL STAY'
+        # churn_color = '#C44E52' if customer_pred_proba > 0.5 else '#55A868'
+        # details_text = (f"Customer #{customer_idx} | "
+        #                f"Actual: {'Churned' if customer_actual == 1 else 'Retained'} | "
+        #                f"Predicted Probability: {customer_pred_proba:.2%} | "
+        #                f"Prediction: ")
+        
+        # fig.text(0.5, 0.02, details_text, ha='center', va='bottom', 
+        #         fontsize=10, fontweight='bold', color='black', transform=fig.transFigure)
+        # fig.text(0.79, 0.02, churn_status, ha='left', va='bottom', 
+        #         fontsize=10, fontweight='bold', color=churn_color, transform=fig.transFigure)
+        from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
+
+        details = TextArea(
+            f"Customer #{customer_idx} | Actual: {'Churned' if customer_actual else 'Retained'} "
+            f"| Predicted Probability: {customer_pred_proba:.2%} | Prediction: ",
+            textprops=dict(color='black', fontsize=10)#, fontweight='bold')
+        )
+        status = TextArea(
+            'WILL CHURN' if customer_pred_proba > 0.5 else 'WILL STAY',
+            textprops=dict(color=('#C44E52' if customer_pred_proba > 0.5 else '#55A868'),
+                        fontsize=10, fontweight='bold')
+        )
+
+        hbox = HPacker(children=[details, status], align="center", pad=0, sep=4)  # sep controls spacing
+        anch = AnchoredOffsetbox(loc='lower center', child=hbox, pad=0, frameon=False,
+                                bbox_to_anchor=(0.5, 0.02), bbox_transform=fig.transFigure,
+                                borderpad=0)
+        fig.add_artist(anch)
+        ax1.set_xlabel('Predicted probability of churn (f(x))', fontweight='bold')
+        ax1.set_ylabel('Feature (value)', fontweight='bold')
+
+        # Adjust layout manually to add more spacing around content
+        plt.subplots_adjust(left=0.04, right=0.96, top=0.82, bottom=0.14)
+        plt.savefig(OUTPUT_DIR / '26_shap_waterfall.png', dpi=300, facecolor='white')
+        plt.close()
+        print("✓ Saved: 26_shap_waterfall.png")
+        
     else:
         print("  ⚠️  SHAP data not found, skipping SHAP plot")
     
-    print(f"\n✅ Generated 6 churn prediction plots in {OUTPUT_DIR}/")
+    print(f"\n✅ Generated 7 churn prediction plots in {OUTPUT_DIR}/")
 
 
 def main():

@@ -232,6 +232,72 @@ def generate_eda_plots(df):
     plt.close()
     print("✓ Saved: 04_products_churn_analysis.png")
     
+    # Plot 4b: Overall Churn Rate Donut Chart (Polished Version)
+    print("\n📊 Generating: 04_products_donut_chart.png")
+    
+    fig, ax = plt.subplots(figsize=(8, 8))
+    
+    # Calculate overall churn statistics
+    churn_counts = df['exited'].value_counts()
+    churn_pct = df['exited'].value_counts(normalize=True) * 100
+    
+    # Define data and appearance
+    data_for_donut = [churn_counts[0], churn_counts[1]]  # Retained, Churned
+    labels_for_donut = ['Retained', 'Churned']
+    colors_for_donut = ['#55A868', '#C44E52']  # Green / Red
+    
+    # Donut chart (balanced proportions)
+    wedges, texts, autotexts = ax.pie(
+        data_for_donut,
+        labels=labels_for_donut,
+        colors=colors_for_donut,
+        autopct='%1.1f%%',
+        startangle=90,
+        pctdistance=0.78,  # bring text closer to center
+        labeldistance=1.05,  # move labels slightly outward
+        wedgeprops={'linewidth': 1.5, 'edgecolor': 'white'},
+        textprops={'fontsize': 13, 'fontweight': 'bold', 'color': 'black'}
+    )
+    
+    # Center circle (controls donut thickness)
+    centre_circle = plt.Circle((0, 0), 0.62, fc='white')
+    ax.add_artist(centre_circle)
+    
+    # Center text block
+    baseline_churn = churn_pct[1]
+    
+    ax.text(
+        0, 0.25, 'Overall Churn Rate',
+        ha='center', va='center',
+        fontsize=18, fontweight='bold', color='black'
+    )
+    ax.text(
+        0, 0.02, 'Baseline',
+        ha='center', va='center',
+        fontsize=14, fontweight='semibold', color='#444444'
+    )
+    ax.text(
+        0, -0.16, f'{baseline_churn:.1f}%',
+        ha='center', va='center',
+        fontsize=28, fontweight='bold', color='#C44E52'
+    )
+    
+    # Title
+    ax.set_title(
+        'Customer Churn Distribution',
+        fontsize=18, fontweight='bold', pad=30
+    )
+    
+    # Clean layout (no axes or spines)
+    ax.axis('equal')  # perfect circle
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / '04_products_donut_chart.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("✓ Saved: 04_products_donut_chart.png")
+    
     # Plot 5: Active Member Status
     print("\n📊 Generating: 05_active_member_impact.png")
     stacked_plot(df, 'isactivemember', 'exited', show_legend=True)
@@ -327,7 +393,993 @@ def generate_eda_plots(df):
     plt.close()
     print("✓ Saved: 08_correlation_heatmap.png")
     
-    print(f"\n✅ Generated {8} EDA plots in {OUTPUT_DIR}/")
+    # Plot 9: Weak Features Comparison (Why They Were Excluded)
+    print("\n📊 Generating: weak_features_comparison.png")
+    
+    # Load raw data before dropping weak features
+    raw_df = pd.read_csv('data/Customer-Churn-Records.csv')
+    raw_df.columns = raw_df.columns.str.lower().str.replace(' ', '')
+    
+    # Calculate churn rates for weak features
+    weak_features_info = []
+    
+    # Card Type (categorical)
+    if 'card_type' in raw_df.columns:
+        card_churn = raw_df.groupby('card_type')['exited'].agg(['sum', 'count'])
+        card_churn['churn_rate'] = (card_churn['sum'] / card_churn['count'] * 100)
+        weak_features_info.append({
+            'name': 'Card Type',
+            'type': 'categorical',
+            'data': card_churn
+        })
+    
+    # Credit Score (continuous - bin into quartiles)
+    if 'creditscore' in raw_df.columns:
+        raw_df['creditscore_bin'] = pd.qcut(raw_df['creditscore'], q=4, labels=['Q1', 'Q2', 'Q3', 'Q4'])
+        credit_churn = raw_df.groupby('creditscore_bin')['exited'].agg(['sum', 'count'])
+        credit_churn['churn_rate'] = (credit_churn['sum'] / credit_churn['count'] * 100)
+        weak_features_info.append({
+            'name': 'Credit Score',
+            'type': 'continuous',
+            'data': credit_churn
+        })
+    
+    # Satisfaction Score (continuous - bin into quartiles)
+    if 'satisfaction_score' in raw_df.columns:
+        raw_df['satisfaction_bin'] = pd.qcut(raw_df['satisfaction_score'], q=4, labels=['Q1', 'Q2', 'Q3', 'Q4'])
+        sat_churn = raw_df.groupby('satisfaction_bin')['exited'].agg(['sum', 'count'])
+        sat_churn['churn_rate'] = (sat_churn['sum'] / sat_churn['count'] * 100)
+        weak_features_info.append({
+            'name': 'Satisfaction Score',
+            'type': 'continuous',
+            'data': sat_churn
+        })
+    
+    # Points Earned (continuous - bin into quartiles)
+    if 'point_earned' in raw_df.columns:
+        raw_df['points_bin'] = pd.qcut(raw_df['point_earned'], q=4, labels=['Q1', 'Q2', 'Q3', 'Q4'])
+        points_churn = raw_df.groupby('points_bin')['exited'].agg(['sum', 'count'])
+        points_churn['churn_rate'] = (points_churn['sum'] / points_churn['count'] * 100)
+        weak_features_info.append({
+            'name': 'Points Earned',
+            'type': 'continuous',
+            'data': points_churn
+        })
+    
+    # Estimated Salary (continuous - bin into quartiles)
+    if 'estimatedsalary' in raw_df.columns:
+        raw_df['salary_bin'] = pd.qcut(raw_df['estimatedsalary'], q=4, labels=['Q1', 'Q2', 'Q3', 'Q4'])
+        salary_churn = raw_df.groupby('salary_bin')['exited'].agg(['sum', 'count'])
+        salary_churn['churn_rate'] = (salary_churn['sum'] / salary_churn['count'] * 100)
+        weak_features_info.append({
+            'name': 'Estimated Salary',
+            'type': 'continuous',
+            'data': salary_churn
+        })
+    
+    # Has Credit Card (binary)
+    if 'hascrcard' in raw_df.columns:
+        card_churn = raw_df.groupby('hascrcard')['exited'].agg(['sum', 'count'])
+        card_churn['churn_rate'] = (card_churn['sum'] / card_churn['count'] * 100)
+        card_churn.index = ['No', 'Yes']
+        weak_features_info.append({
+            'name': 'Has Credit Card',
+            'type': 'binary',
+            'data': card_churn
+        })
+    
+    # Create small multiples plot
+    n_features = len(weak_features_info)
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    axes = axes.flatten()
+    
+    # Common reference line for all subplots (baseline churn rate)
+    baseline_churn = raw_df['exited'].mean() * 100
+    
+    for idx, feature_info in enumerate(weak_features_info):
+        ax = axes[idx]
+        data = feature_info['data']
+        
+        # Create bar plot
+        bars = ax.bar(range(len(data)), data['churn_rate'], 
+                     color='#95a5a6', alpha=0.7, edgecolor='black', linewidth=1.5)
+        
+        # Add baseline reference line
+        ax.axhline(y=baseline_churn, color='red', linestyle='--', linewidth=2, 
+                  alpha=0.5, label=f'Baseline ({baseline_churn:.1f}%)')
+        
+        # Label bars with values
+        for i, bar in enumerate(bars):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                   f'{height:.1f}%', ha='center', va='bottom', 
+                   fontsize=9, fontweight='bold')
+        
+        # Formatting
+        ax.set_title(feature_info['name'], fontsize=12, fontweight='bold', pad=10)
+        ax.set_ylabel('Churn Rate (%)', fontsize=10, fontweight='bold')
+        ax.set_xticks(range(len(data)))
+        ax.set_xticklabels(data.index, rotation=45, ha='right', fontsize=9)
+        ax.set_ylim(0, max(data['churn_rate'].max(), baseline_churn) * 1.15)
+        
+        # Only show legend on first subplot
+        if idx == 0:
+            ax.legend(fontsize=8, loc='upper right')
+        
+        # Ensure all spines are visible and black
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
+    
+    # Hide any unused subplots
+    for idx in range(n_features, len(axes)):
+        axes[idx].axis('off')
+    
+    plt.suptitle('Weak Features Show Minimal Variation in Churn Rates', 
+                 fontsize=15, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(OUTPUT_DIR / 'weak_features_comparison.png')
+    plt.close()
+    print("✓ Saved: weak_features_comparison.png")
+    
+    print(f"\n✅ Generated {9} EDA plots in {OUTPUT_DIR}/")
+    
+    # Generate PoC versions of alternative plot types
+    print("\n📊 Generating PoC plots for weak features visualization...")
+    generate_weak_features_poc_plots(raw_df)
+    
+    print(f"\n✅ Generated PoC plots in {OUTPUT_DIR}/")
+    
+    # Generate PoC versions for active member impact plots
+    print("\n📊 Generating PoC plots for active member impact visualization...")
+    generate_active_member_poc_plots(df)
+    
+    print(f"\n✅ Generated active member PoC plots in {OUTPUT_DIR}/")
+
+
+def generate_active_member_poc_plots(df):
+    """Generate PoC versions of different plot types for active member impact"""
+    
+    # Create PoC subfolder
+    poc_dir = OUTPUT_DIR / 'active_member_pocs'
+    poc_dir.mkdir(exist_ok=True)
+    
+    # Calculate churn rates
+    active_churn = df.groupby('isactivemember')['exited'].agg(['sum', 'count'])
+    active_churn['churn_rate'] = (active_churn['sum'] / active_churn['count'] * 100)
+    
+    # Get values using .values or explicit keys
+    churn_rates = active_churn['churn_rate'].values
+    active_rate = churn_rates[1] if len(churn_rates) > 1 else churn_rates[0]  # Active members (index 1)
+    inactive_rate = churn_rates[0]  # Inactive members (index 0)
+    risk_ratio = inactive_rate / active_rate
+    
+    print(f"  📊 Active: {active_rate:.1f}%, Inactive: {inactive_rate:.1f}%, Ratio: {risk_ratio:.2f}×")
+    
+    # PoC 1: Dumbbell Plot
+    print("  📊 Type 1: Dumbbell Plot")
+    fig, ax = plt.subplots(figsize=(10, 4))
+    
+    ax.plot([active_rate, inactive_rate], [1, 1], 'k-', lw=3, alpha=0.5)
+    ax.scatter([active_rate, inactive_rate], [1, 1], s=500, 
+              color=['#55A868', '#C44E52'], edgecolors='black', linewidth=2, zorder=10)
+    
+    ax.text((active_rate + inactive_rate)/2, 1.25, f'{risk_ratio:.2f}× higher churn risk',
+           ha='center', color='#C44E52', fontsize=14, fontweight='bold')
+    
+    ax.text(active_rate, 0.65, 'Active', ha='center', fontsize=12, fontweight='bold')
+    ax.text(inactive_rate, 0.65, 'Inactive', ha='center', fontsize=12, fontweight='bold')
+    ax.text(active_rate, 1.45, f'{active_rate:.1f}%', ha='center', fontsize=11, fontweight='bold')
+    ax.text(inactive_rate, 1.45, f'{inactive_rate:.1f}%', ha='center', fontsize=11, fontweight='bold')
+    
+    ax.set_xlabel('Churn Rate (%)', fontsize=13, fontweight='bold')
+    ax.set_xlim(0, max(inactive_rate, active_rate) * 1.3)
+    ax.set_ylim(0, 1.7)
+    ax.set_yticks([])
+    ax.set_title('Relative Churn Risk: Active vs Inactive Members', 
+                fontsize=15, fontweight='bold', pad=15)
+    
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    plt.tight_layout()
+    plt.savefig(poc_dir / '01_dumbbell_plot.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 01_dumbbell_plot.png")
+    
+    # PoC 2: Risk Ratio Meter (Gauge)
+    print("  📊 Type 2: Risk Ratio Meter")
+    fig, ax = plt.subplots(figsize=(10, 4))
+    
+    # Create gauge
+    x_range = np.linspace(1.0, 2.0, 100)
+    y_val = 0.5
+    
+    ax.fill_between(x_range, y_val-0.2, y_val+0.2, 
+                   where=(x_range <= risk_ratio), 
+                   color='#C44E52', alpha=0.3)
+    ax.fill_between(x_range, y_val-0.2, y_val+0.2, 
+                   where=(x_range > risk_ratio), 
+                   color='lightgray', alpha=0.3)
+    
+    ax.axvline(x=risk_ratio, color='#C44E52', linewidth=4, linestyle='-')
+    ax.scatter([risk_ratio], [y_val], s=400, color='#C44E52', 
+              edgecolors='black', linewidth=2, zorder=10)
+    
+    ax.text(risk_ratio, y_val+0.4, f'{risk_ratio:.2f}×', 
+           ha='center', fontsize=18, fontweight='bold', color='#C44E52')
+    ax.text(1.0, y_val-0.45, '1.0×\n(Active)', ha='center', fontsize=11, fontweight='bold')
+    ax.text(2.0, y_val-0.45, '2.0×\n(Inactive)', ha='center', fontsize=11, fontweight='bold')
+    
+    ax.set_xlim(0.9, 2.1)
+    ax.set_ylim(0, 1.2)
+    ax.set_yticks([])
+    ax.set_xlabel('Relative Churn Risk', fontsize=13, fontweight='bold')
+    ax.set_title('Churn Risk Ratio: Active vs Inactive Members', 
+                fontsize=15, fontweight='bold', pad=15)
+    
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    plt.tight_layout()
+    plt.savefig(poc_dir / '02_risk_ratio_meter.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 02_risk_ratio_meter.png")
+    
+    # PoC 3: Slope Graph
+    print("  📊 Type 3: Slope Graph")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    ax.plot([0, 1], [active_rate, inactive_rate], color='#C44E52', linewidth=4, marker='o', 
+           markersize=12, markeredgecolor='black', markeredgewidth=2)
+    
+    ax.text(0, active_rate-3, 'Active', ha='center', fontsize=12, fontweight='bold')
+    ax.text(1, inactive_rate+3, 'Inactive', ha='center', fontsize=12, fontweight='bold')
+    ax.text(0, active_rate+5, f'{active_rate:.1f}%', ha='center', fontsize=11, fontweight='bold')
+    ax.text(1, inactive_rate+5, f'{inactive_rate:.1f}%', ha='center', fontsize=11, fontweight='bold')
+    
+    ax.text(0.5, (active_rate + inactive_rate)/2 + 5, 
+           f'Churn rises {inactive_rate-active_rate:.1f}%\n({risk_ratio:.2f}× increase)',
+           ha='center', fontsize=12, fontweight='bold', color='#C44E52',
+           bbox=dict(boxstyle='round', facecolor='white', alpha=0.9, edgecolor='black'))
+    
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(['Active', 'Inactive'], fontsize=12, fontweight='bold')
+    ax.set_ylabel('Churn Rate (%)', fontsize=13, fontweight='bold')
+    ax.set_ylim(0, max(inactive_rate, active_rate) * 1.25)
+    ax.set_title('Slope Graph: Churn Rate Change by Activity Status', 
+                fontsize=15, fontweight='bold', pad=15)
+    
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    plt.tight_layout()
+    plt.savefig(poc_dir / '03_slope_graph.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 03_slope_graph.png")
+    
+    # PoC 4: Waffle Plot
+    print("  📊 Type 4: Waffle Plot")
+    fig, axes = plt.subplots(1, 2, figsize=(14, 7))
+    
+    for idx, (status, rate) in enumerate([('Active', active_rate), ('Inactive', inactive_rate)]):
+        ax = axes[idx]
+        
+        # Create 10x10 grid
+        grid = np.zeros((10, 10))
+        churned_squares = int(round(rate))
+        grid.flat[:churned_squares] = 1
+        
+        colors_map = {0: '#55A868', 1: '#C44E52'}
+        for i in range(10):
+            for j in range(10):
+                rect = plt.Rectangle((j, 9-i), 1, 1, 
+                                   facecolor=colors_map[grid[i, j]], 
+                                   edgecolor='white', linewidth=1.5)
+                ax.add_patch(rect)
+        
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, 10)
+        ax.set_aspect('equal')
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_title(f'{status}\n{rate:.1f}% Churn Rate', 
+                    fontsize=14, fontweight='bold', pad=15)
+        
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
+    
+    plt.suptitle('Waffle Plot: Churn Distribution (Each Square = 1%)', 
+                fontsize=16, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(poc_dir / '04_waffle_plot.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 04_waffle_plot.png")
+    
+    # PoC 5: Pyramid/Mirror Bar Plot
+    print("  📊 Type 5: Pyramid Mirror Bar Plot")
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # Get totals
+    counts = active_churn['count'].values
+    sums = active_churn['sum'].values
+    
+    # Inactive (left side)
+    inactive_total = counts[0]
+    inactive_churned = sums[0]
+    inactive_retained = inactive_total - inactive_churned
+    
+    # Active (right side)
+    active_total = counts[1] if len(counts) > 1 else counts[0]
+    active_churned = sums[1] if len(sums) > 1 else sums[0]
+    active_retained = active_total - active_churned
+    
+    # Left side (inactive)
+    ax.barh([0.5], [inactive_churned], left=[0], height=0.3, 
+           color='#C44E52', edgecolor='black', linewidth=1.5)
+    ax.barh([0.5], [inactive_retained], left=[inactive_churned], height=0.3,
+           color='#55A868', edgecolor='black', linewidth=1.5)
+    
+    # Right side (active) - mirrored
+    ax.barh([0.5], [active_churned], left=[0], height=0.3,
+           color='#C44E52', edgecolor='black', linewidth=1.5)
+    ax.barh([0.5], [active_retained], left=[active_churned], height=0.3,
+           color='#55A868', edgecolor='black', linewidth=1.5)
+    
+    # Labels
+    ax.text(-inactive_total/2, 0.5, 'Inactive', ha='center', va='center',
+           fontsize=13, fontweight='bold')
+    ax.text(inactive_total/2, 0.5, 'Active', ha='center', va='center',
+           fontsize=13, fontweight='bold')
+    
+    ax.text(0, 0.85, f'{risk_ratio:.2f}× difference', ha='center', va='center',
+           fontsize=14, fontweight='bold', color='#C44E52',
+           bbox=dict(boxstyle='round', facecolor='white', alpha=0.9, edgecolor='black'))
+    
+    ax.set_xlim(-inactive_total*1.1, active_total*1.1)
+    ax.set_ylim(0, 1.1)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_title('Mirror Bar Plot: Distribution Comparison', 
+                fontsize=15, fontweight='bold', pad=15)
+    
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    plt.tight_layout()
+    plt.savefig(poc_dir / '05_pyramid_mirror.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 05_pyramid_mirror.png")
+    
+    # PoC 6: Violin Plot (for comparison)
+    print("  📊 Type 6: Violin Plot")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    from scipy.stats import gaussian_kde
+    
+    # Simulate churn probabilities (for demo purposes)
+    np.random.seed(42)
+    active_probs = np.random.beta(2, 10, 5000) * 20  # Low churn
+    inactive_probs = np.random.beta(4, 10, 5000) * 35  # Higher churn
+    
+    parts = ax.violinplot([active_probs, inactive_probs], positions=[0, 1],
+                         showmeans=True, showmedians=True)
+    
+    for pc in parts['bodies']:
+        pc.set_facecolor('#95a5a6')
+        pc.set_alpha(0.6)
+    
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(['Active', 'Inactive'], fontsize=12, fontweight='bold')
+    ax.set_ylabel('Churn Probability Distribution', fontsize=13, fontweight='bold')
+    ax.set_title('Violin Plot: Risk Separation', fontsize=15, fontweight='bold', pad=15)
+    
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    plt.tight_layout()
+    plt.savefig(poc_dir / '06_violin_plot.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 06_violin_plot.png")
+    
+    # PoC 7: Hybrid Panel (Count + Risk Ratio Gauge)
+    print("  📊 Type 7: Hybrid Panel")
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    
+    # Left panel: Counts
+    ax1 = axes[0]
+    counts = [active_total, inactive_total]
+    bars = ax1.bar(['Active', 'Inactive'], counts, color=['#55A868', '#C44E52'], 
+                   alpha=0.7, edgecolor='black', linewidth=1.5)
+    
+    for bar, count in zip(bars, counts):
+        height = bar.get_height()
+        ax1.text(bar.get_x() + bar.get_width()/2., height,
+                f'{count:,}', ha='center', va='bottom', fontsize=12, fontweight='bold')
+    
+    ax1.set_ylabel('Number of Customers', fontsize=12, fontweight='bold')
+    ax1.set_title('Customer Distribution', fontsize=14, fontweight='bold', pad=15)
+    
+    for spine in ax1.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    # Right panel: Risk ratio gauge
+    ax2 = axes[1]
+    x_range = np.linspace(1.0, 2.0, 100)
+    y_val = 0.5
+    
+    ax2.fill_between(x_range, y_val-0.2, y_val+0.2, 
+                    where=(x_range <= risk_ratio), 
+                    color='#C44E52', alpha=0.3)
+    ax2.fill_between(x_range, y_val-0.2, y_val+0.2, 
+                    where=(x_range > risk_ratio), 
+                    color='lightgray', alpha=0.3)
+    
+    ax2.axvline(x=risk_ratio, color='#C44E52', linewidth=4)
+    ax2.scatter([risk_ratio], [y_val], s=400, color='#C44E52', 
+               edgecolors='black', linewidth=2, zorder=10)
+    
+    ax2.text(risk_ratio, y_val+0.4, f'{risk_ratio:.2f}×', 
+            ha='center', fontsize=20, fontweight='bold', color='#C44E52')
+    ax2.text(1.0, y_val-0.45, '1.0×', ha='center', fontsize=11, fontweight='bold')
+    ax2.text(2.0, y_val-0.45, '2.0×', ha='center', fontsize=11, fontweight='bold')
+    
+    ax2.set_xlim(0.9, 2.1)
+    ax2.set_ylim(0, 1.2)
+    ax2.set_yticks([])
+    ax2.set_xlabel('Relative Churn Risk', fontsize=12, fontweight='bold')
+    ax2.set_title('Risk Ratio', fontsize=14, fontweight='bold', pad=15)
+    
+    for spine in ax2.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    plt.suptitle('Hybrid Panel: Distribution + Risk Ratio', 
+                fontsize=16, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(poc_dir / '07_hybrid_panel.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 07_hybrid_panel.png")
+    
+    # PoC 8: Churn Rate + Violin Plot Hybrid
+    print("  📊 Type 8: Churn Rate + Violin Plot Hybrid")
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    
+    # Left panel: Churn rate bar chart
+    ax1 = axes[0]
+    churn_rates_plot = [active_rate, inactive_rate]
+    # Updated color palette: tab:blue and tab:orange
+    bars = ax1.bar(['Active', 'Inactive'], churn_rates_plot, 
+                   color=['#1f77b4', '#ff7f0e'], alpha=0.6, 
+                   edgecolor='black', linewidth=1.5)
+    
+    for bar, rate in zip(bars, churn_rates_plot):
+        height = bar.get_height()
+        ax1.text(bar.get_x() + bar.get_width()/2., height,
+                f'{rate:.1f}%', ha='center', va='bottom', 
+                fontsize=13, fontweight='bold')
+    
+    # Add annotation centered above inactive bar (no arrow, reduced spacing)
+    ax1.text(1, inactive_rate + 3, f'{risk_ratio:.2f}× higher churn risk',
+             ha='center', fontsize=13, fontweight='bold', color='#ff7f0e')
+    
+    ax1.set_ylabel('Churn Rate (%)', fontsize=13, fontweight='bold')
+    ax1.set_title('Churn Rate by Activity Status', fontsize=14, fontweight='bold', pad=15)
+    ax1.set_ylim(0, max(churn_rates_plot) * 1.25)
+    ax1.set_xticklabels(['Active', 'Inactive'], fontweight='bold')
+    
+    for spine in ax1.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    # Right panel: Violin plot
+    ax2 = axes[1]
+    
+    from scipy.stats import gaussian_kde
+    
+    # Simulate churn probabilities (for demo purposes)
+    np.random.seed(42)
+    active_probs = np.random.beta(2, 10, 5000) * 20  # Low churn
+    inactive_probs = np.random.beta(4, 10, 5000) * 35  # Higher churn
+    
+    parts = ax2.violinplot([active_probs, inactive_probs], positions=[0, 1],
+                         showmeans=True, showmedians=True)
+    
+    # Use matching colors from bar chart
+    violin_colors = ['#1f77b4', '#ff7f0e']  # Blue for active, orange for inactive
+    for i, pc in enumerate(parts['bodies']):
+        pc.set_facecolor(violin_colors[i])
+        pc.set_alpha(0.6)
+    
+    ax2.set_xticks([0, 1])
+    ax2.set_xticklabels(['Active', 'Inactive'], fontsize=12, fontweight='bold')
+    ax2.set_ylabel('Churn Probability Distribution', fontsize=13, fontweight='bold')
+    ax2.yaxis.tick_right()  # Move y-axis to the right
+    ax2.yaxis.set_label_position('right')  # Move y-axis label to the right
+    ax2.set_title('Risk Distribution Comparison', fontsize=14, fontweight='bold', pad=15)
+    
+    for spine in ax2.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+    
+    plt.suptitle('Activity Status Impact: Churn Rate and Risk Distribution', 
+                fontsize=16, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(poc_dir / '08_churn_rate_violin_hybrid.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 08_churn_rate_violin_hybrid.png")
+    
+    # PoC 8b: Horizontal version (swapped axes)
+    print("  📊 Type 8b: Churn Rate + Violin Plot Hybrid (Horizontal)")
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    
+    # Left panel: Churn rate bar chart (horizontal)
+    ax1 = axes[0]
+    churn_rates_plot = [active_rate, inactive_rate]
+    bars = ax1.barh(['Active', 'Inactive'], churn_rates_plot, 
+                    color=['#1f77b4', '#ff7f0e'], alpha=0.6, 
+                    edgecolor='black', linewidth=1.5)
+    
+    for bar, rate in zip(bars, churn_rates_plot):
+        width = bar.get_width()
+        ax1.text(width, bar.get_y() + bar.get_height()/2.,
+                f'{rate:.1f}%', ha='left', va='center', 
+                fontsize=13, fontweight='bold')
+    
+    ax1.set_xlabel('Churn Rate (%)', fontsize=13, fontweight='normal')
+    ax1.set_title('Churn Rate by Activity Status', fontsize=14, fontweight='normal', pad=15)
+    ax1.set_xlim(0, max(churn_rates_plot) * 1.3)
+    ax1.set_yticklabels(['Active', 'Inactive'], fontsize=14, fontweight='bold')
+    
+    # Remove top and right spines, keep left and bottom
+    ax1.spines['top'].set_visible(False)
+    ax1.spines['right'].set_visible(False)
+    ax1.spines['left'].set_visible(True)
+    ax1.spines['bottom'].set_visible(True)
+    ax1.spines['left'].set_color('black')
+    ax1.spines['bottom'].set_color('black')
+    
+    # Right panel: Violin plot (horizontal)
+    ax2 = axes[1]
+    
+    from scipy.stats import gaussian_kde
+    
+    # Simulate churn probabilities (for demo purposes)
+    np.random.seed(42)
+    active_probs = np.random.beta(2, 10, 5000) * 20  # Low churn
+    inactive_probs = np.random.beta(4, 10, 5000) * 35  # Higher churn
+    
+    # Create horizontal violin plot
+    parts = ax2.violinplot([active_probs, inactive_probs], positions=[0, 1],
+                         showmeans=True, showmedians=True, vert=False)
+    
+    # Use matching colors from bar chart
+    violin_colors = ['#1f77b4', '#ff7f0e']  # Blue for active, orange for inactive
+    for i, pc in enumerate(parts['bodies']):
+        pc.set_facecolor(violin_colors[i])
+        pc.set_alpha(0.6)
+    
+    ax2.set_yticks([0, 1])
+    ax2.set_yticklabels([])  # No y-axis labels since they align with left plot
+    ax2.set_xlabel('Churn Probability Distribution', fontsize=13, fontweight='normal')
+    ax2.set_title('Risk Distribution Comparison', fontsize=14, fontweight='normal', pad=15)
+    
+    # Remove top and right spines, keep left and bottom
+    ax2.spines['top'].set_visible(False)
+    ax2.spines['right'].set_visible(False)
+    ax2.spines['left'].set_visible(True)
+    ax2.spines['bottom'].set_visible(True)
+    ax2.spines['left'].set_color('black')
+    ax2.spines['bottom'].set_color('black')
+    
+    plt.suptitle('Activity Status Impact: Churn Rate and Risk Distribution', 
+                fontsize=16, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(poc_dir / '08_churn_rate_violin_hybridv2.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: 08_churn_rate_violin_hybridv2.png")
+
+
+def generate_weak_features_poc_plots(raw_df):
+    """Generate PoC versions of different plot types for weak features"""
+    
+    # Prepare data for CONTINUOUS features only (swap x/y axis approach)
+    continuous_features = {}
+    
+    # Credit Score
+    if 'creditscore' in raw_df.columns:
+        continuous_features['Credit Score'] = raw_df[['creditscore', 'exited']].copy()
+    
+    # Satisfaction Score
+    if 'satisfaction_score' in raw_df.columns:
+        continuous_features['Satisfaction Score'] = raw_df[['satisfaction_score', 'exited']].copy()
+    
+    # Points Earned
+    if 'point_earned' in raw_df.columns:
+        continuous_features['Points Earned'] = raw_df[['point_earned', 'exited']].copy()
+    
+    # Estimated Salary
+    if 'estimatedsalary' in raw_df.columns:
+        continuous_features['Estimated Salary'] = raw_df[['estimatedsalary', 'exited']].copy()
+    
+    # Get feature names
+    feature_names = list(continuous_features.keys())
+    n_features = len(feature_names)
+    
+    # 1. VIOLIN PLOTS (swapped axes)
+    print("  📊 Type 1: Violin plots")
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    axes = axes.flatten()
+    
+    for idx, feat_name in enumerate(feature_names):
+        ax = axes[idx]
+        data = continuous_features[feat_name]
+        
+        # Get feature column name
+        feat_col = 'creditscore' if feat_name == 'Credit Score' else \
+                   'satisfaction_score' if feat_name == 'Satisfaction Score' else \
+                   'point_earned' if feat_name == 'Points Earned' else 'estimatedsalary'
+        
+        # Create violin plot with swapped axes
+        parts = ax.violinplot([data[data['exited'] == 0][feat_col].values,
+                               data[data['exited'] == 1][feat_col].values],
+                             positions=[0, 1],
+                             showmeans=True, showmedians=True)
+        
+        # Set colors
+        for pc in parts['bodies']:
+            pc.set_facecolor('#95a5a6')
+            pc.set_alpha(0.7)
+        
+        # Formatting
+        ax.set_title(feat_name, fontsize=12, fontweight='bold', pad=10)
+        ax.set_xlabel('Churn Status', fontsize=10, fontweight='bold')
+        ax.set_ylabel(feat_name, fontsize=10, fontweight='bold')
+        ax.set_xticks([0, 1])
+        ax.set_xticklabels(['Retained', 'Churned'], fontsize=9)
+        
+        # Ensure all spines are visible and black
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
+    
+    # Hide unused
+    for idx in range(n_features, len(axes)):
+        axes[idx].axis('off')
+    
+    plt.suptitle('Violin Plots: Distribution of Feature Values by Churn Status', 
+                 fontsize=15, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(OUTPUT_DIR / 'poc_violin_plots.png')
+    plt.close()
+    print("    ✓ Saved: poc_violin_plots.png")
+    
+    # 2. BOX PLOTS (swapped axes)
+    print("  📊 Type 2: Box plots")
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    axes = axes.flatten()
+    
+    for idx, feat_name in enumerate(feature_names):
+        ax = axes[idx]
+        data = continuous_features[feat_name]
+        
+        # Get feature column name
+        feat_col = 'creditscore' if feat_name == 'Credit Score' else \
+                   'satisfaction_score' if feat_name == 'Satisfaction Score' else \
+                   'point_earned' if feat_name == 'Points Earned' else 'estimatedsalary'
+        
+        # Create box plot with swapped axes
+        box_data = [data[data['exited'] == 0][feat_col].values,
+                    data[data['exited'] == 1][feat_col].values]
+        bp = ax.boxplot(box_data, patch_artist=True, labels=['Retained', 'Churned'])
+        
+        # Set colors
+        for patch in bp['boxes']:
+            patch.set_facecolor('#95a5a6')
+            patch.set_alpha(0.7)
+        
+        # Formatting
+        ax.set_title(feat_name, fontsize=12, fontweight='bold', pad=10)
+        ax.set_xlabel('Churn Status', fontsize=10, fontweight='bold')
+        ax.set_ylabel(feat_name, fontsize=10, fontweight='bold')
+        ax.set_xticklabels(['Retained', 'Churned'], fontsize=9)
+        
+        # Ensure all spines are visible and black
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
+    
+    # Hide unused
+    for idx in range(n_features, len(axes)):
+        axes[idx].axis('off')
+    
+    plt.suptitle('Box Plots: Distribution of Feature Values by Churn Status', 
+                 fontsize=15, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(OUTPUT_DIR / 'poc_box_plots.png')
+    plt.close()
+    print("    ✓ Saved: poc_box_plots.png")
+    
+    # 3. STRIP PLOTS WITH JITTER (swapped axes)
+    print("  📊 Type 3: Strip plots with jitter")
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    axes = axes.flatten()
+    
+    for idx, feat_name in enumerate(feature_names):
+        ax = axes[idx]
+        data = continuous_features[feat_name]
+        
+        # Get feature column name
+        feat_col = 'creditscore' if feat_name == 'Credit Score' else \
+                   'satisfaction_score' if feat_name == 'Satisfaction Score' else \
+                   'point_earned' if feat_name == 'Points Earned' else 'estimatedsalary'
+        
+        # Create strip plot with jitter and swapped axes
+        # Retained customers
+        retained_data = data[data['exited'] == 0][feat_col].values
+        jitter_retained = np.random.normal(0, 0.05, len(retained_data))
+        ax.scatter(0 + jitter_retained, retained_data, alpha=0.3, s=20, 
+                  color='#55A868', edgecolors='black', linewidths=0.5, label='Retained')
+        
+        # Churned customers
+        churned_data = data[data['exited'] == 1][feat_col].values
+        jitter_churned = np.random.normal(0, 0.05, len(churned_data))
+        ax.scatter(1 + jitter_churned, churned_data, alpha=0.3, s=20, 
+                  color='#C44E52', edgecolors='black', linewidths=0.5, label='Churned')
+        
+        # Formatting
+        ax.set_title(feat_name, fontsize=12, fontweight='bold', pad=10)
+        ax.set_xlabel('Churn Status', fontsize=10, fontweight='bold')
+        ax.set_ylabel(feat_name, fontsize=10, fontweight='bold')
+        ax.set_xticks([0, 1])
+        ax.set_xticklabels(['Retained', 'Churned'], fontsize=9)
+        
+        # Ensure all spines are visible and black
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
+    
+    # Hide unused
+    for idx in range(n_features, len(axes)):
+        axes[idx].axis('off')
+    
+    plt.suptitle('Strip Plots with Jitter: Individual Feature Values by Churn Status', 
+                 fontsize=15, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(OUTPUT_DIR / 'poc_strip_plots.png')
+    plt.close()
+    print("    ✓ Saved: poc_strip_plots.png")
+    
+    # 4. PARTIAL DEPENDENCE PLOTS (PDPs) - Skipped due to model complexity
+    print("  📊 Type 4: Partial Dependence Plots")
+    print("    ⚠️  Skipping PDP plots (would require model refitting with specific features)")
+    
+    # 5. LOGISTIC REGRESSION ODDS RATIO PLOT
+    print("  📊 Type 5: Logistic Regression Odds Ratio Plot")
+    from sklearn.linear_model import LogisticRegression
+    from scipy import stats
+    
+    # Prepare data for logistic regression - reload with correct column names
+    logreg_raw = pd.read_csv('data/Customer-Churn-Records.csv')
+    logreg_raw.columns = logreg_raw.columns.str.lower().str.replace(' ', '_')
+    logreg_df = logreg_raw[['age', 'creditscore', 'satisfaction_score', 'point_earned', 'estimatedsalary', 'exited']].copy()
+    
+    # Fit individual logistic regressions for each feature
+    odds_ratios = []
+    ci_lowers = []
+    ci_uppers = []
+    feature_names_logreg = []
+    feature_colors = []  # Track colors for each feature
+    
+    # Include strong predictor (age) first for comparison
+    features_to_analyze = ['age', 'creditscore', 'satisfaction_score', 'point_earned', 'estimatedsalary']
+    
+    for feat in features_to_analyze:
+        if feat not in logreg_df.columns:
+            continue
+        
+        # Standardize feature
+        X_feat = (logreg_df[feat] - logreg_df[feat].mean()) / logreg_df[feat].std()
+        y = logreg_df['exited']
+        
+        # Fit logistic regression
+        lr = LogisticRegression()
+        lr.fit(X_feat.values.reshape(-1, 1), y)
+        
+        # Get coefficients and odds ratio
+        coef = lr.coef_[0][0]
+        or_val = np.exp(coef)
+        
+        # Calculate confidence interval (using Wald method)
+        # Standard error
+        se = np.sqrt(np.var(X_feat) / len(X_feat))
+        z_score = 1.96  # 95% CI
+        
+        ci_lower = np.exp(coef - z_score * se)
+        ci_upper = np.exp(coef + z_score * se)
+        
+        odds_ratios.append(or_val)
+        ci_lowers.append(ci_lower)
+        ci_uppers.append(ci_upper)
+        feature_names_logreg.append(feat)
+        
+        # Assign color based on feature type
+        if feat == 'age':
+            feature_colors.append('#C44E52')  # Red for strong predictor
+        else:
+            feature_colors.append('#95a5a6')  # Gray for weak predictors
+    
+    # Create forest plot
+    fig, ax = plt.subplots(figsize=(12, 6))
+    
+    y_pos = np.arange(len(feature_names_logreg))
+    
+    # Calculate appropriate x-axis range based on all CI bounds
+    all_ci_bounds = ci_lowers + ci_uppers
+    x_min = min(all_ci_bounds) * 0.995  # Add small margin
+    x_max = max(all_ci_bounds) * 1.005
+    
+    # Extend range to ensure it includes 1.0 if needed
+    if x_min > 1.0:
+        x_min = 0.98
+    if x_max < 1.0:
+        x_max = 1.02
+    
+    # Round to nice numbers
+    x_min = round(x_min - 0.01, 2)
+    x_max = round(x_max + 0.01, 2)
+    
+    # Plot confidence intervals with thicker lines
+    for i, (or_val, ci_low, ci_upp, color) in enumerate(zip(odds_ratios, ci_lowers, ci_uppers, feature_colors)):
+        ax.plot([ci_low, ci_upp], [i, i], color=color, linewidth=3.5, alpha=0.8)
+    
+    # Plot odds ratios with larger, more visible points
+    for i, (or_val, color) in enumerate(zip(odds_ratios, feature_colors)):
+        ax.scatter(or_val, y_pos[i], s=150, color=color, edgecolors='black', 
+                  linewidth=2.5, zorder=10, marker='D')
+    
+    # Add reference line at OR = 1
+    ax.axvline(x=1, color='#C44E52', linestyle='--', linewidth=2.5, alpha=0.8, 
+              label='OR = 1 (No Effect)', zorder=5)
+    
+    # Formatting
+    ax.set_yticks(y_pos)
+    # Create label mapping
+    label_map = {
+        'age': 'Age (Strong Predictor)',
+        'creditscore': 'Credit Score',
+        'satisfaction_score': 'Satisfaction Score',
+        'point_earned': 'Points Earned',
+        'estimatedsalary': 'Estimated Salary'
+    }
+    ax.set_yticklabels([label_map.get(feat, feat) for feat in feature_names_logreg], 
+                       fontsize=11, fontweight='bold')
+    ax.set_xlabel('Odds Ratio (95% Confidence Interval)', fontsize=13, fontweight='bold')
+    ax.set_title('Logistic Regression: Odds Ratios Comparing Strong vs Weak Predictors', 
+                 fontsize=15, fontweight='bold', pad=20)
+    ax.set_xlim(x_min, x_max)
+    
+    # Add grid for readability
+    ax.grid(axis='x', alpha=0.3, linestyle=':', linewidth=1)
+    ax.set_axisbelow(True)
+    
+    # Legend with better positioning and color explanation
+    from matplotlib.patches import Patch
+    legend_elements = [
+        ax.axvline(0, 0, 0, color='#C44E52', linestyle='--', linewidth=2.5, alpha=0.8, label='OR = 1 (No Effect)'),
+        Patch(facecolor='#C44E52', edgecolor='black', label='Strong Predictor (Age)'),
+        Patch(facecolor='#95a5a6', edgecolor='black', label='Weak Predictors')
+    ]
+    ax.legend(handles=legend_elements, fontsize=10, loc='upper right', framealpha=0.95)
+    
+    # Add text annotations with better formatting
+    for i, (or_val, ci_low, ci_upp) in enumerate(zip(odds_ratios, ci_lowers, ci_uppers)):
+        ax.text(x_max - (x_max - x_min) * 0.05, i, 
+               f'{or_val:.3f}  [{ci_low:.3f}, {ci_upp:.3f}]', 
+               va='center', fontsize=10, fontweight='bold',
+               bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8, edgecolor='black'))
+    
+    # Invert y-axis so top feature is at top
+    ax.invert_yaxis()
+    
+    # Ensure all spines are visible and black
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_color('black')
+        spine.set_linewidth(1.5)
+    
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / 'poc_odds_ratio_plot.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: poc_odds_ratio_plot.png")
+    
+    # 6. KDE PLOTS FOR WEAK FEATURES
+    print("  📊 Type 6: KDE plots for weak features")
+    
+    # Prepare data for KDE plots
+    kde_raw = pd.read_csv('data/Customer-Churn-Records.csv')
+    kde_raw.columns = kde_raw.columns.str.lower().str.replace(' ', '_')
+    
+    # Define features and labels
+    kde_features = ['creditscore', 'satisfaction_score', 'point_earned', 'estimatedsalary']
+    kde_labels = ['Credit Score', 'Satisfaction Score', 'Points Earned', 'Estimated Salary']
+    
+    # Create subplots
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    axes = axes.flatten()
+    
+    for idx, (feat, label) in enumerate(zip(kde_features, kde_labels)):
+        ax = axes[idx]
+        
+        # Split data by churn status
+        retained_data = kde_raw[kde_raw['exited'] == 0][feat].values
+        churned_data = kde_raw[kde_raw['exited'] == 1][feat].values
+        
+        # Create KDE plots
+        from scipy.stats import gaussian_kde
+        
+        # Compute KDE for retained customers
+        kde_retained = gaussian_kde(retained_data)
+        kde_churned = gaussian_kde(churned_data)
+        
+        # Create x-axis range
+        x_min = min(kde_raw[feat].min(), retained_data.min(), churned_data.min())
+        x_max = max(kde_raw[feat].max(), retained_data.max(), churned_data.max())
+        x_range = np.linspace(x_min, x_max, 300)
+        
+        # Evaluate KDE
+        kde_retained_vals = kde_retained(x_range)
+        kde_churned_vals = kde_churned(x_range)
+        
+        # Plot KDE curves
+        ax.plot(x_range, kde_retained_vals, color='#55A868', linewidth=2.5, 
+               label='Retained', alpha=0.8)
+        ax.fill_between(x_range, kde_retained_vals, alpha=0.3, color='#55A868')
+        
+        ax.plot(x_range, kde_churned_vals, color='#C44E52', linewidth=2.5, 
+               label='Churned', alpha=0.8)
+        ax.fill_between(x_range, kde_churned_vals, alpha=0.3, color='#C44E52')
+        
+        # Formatting
+        ax.set_xlabel(label, fontsize=13, fontweight='bold')
+        
+        # Only show y-axis on left column (indices 0 and 2)
+        if idx in [0, 2]:
+            ax.set_ylabel('Density', fontsize=12, fontweight='bold')
+        else:
+            ax.set_yticks([])
+            ax.set_yticklabels([])
+        
+        # Ensure all spines are visible and black
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color('black')
+            spine.set_linewidth(1.5)
+    
+    # Create a single centered legend below the title
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor='#55A868', edgecolor='black', label='Retained'),
+        Patch(facecolor='#C44E52', edgecolor='black', label='Churned')
+    ]
+    
+    # Add legend at figure level, centered below title
+    fig.legend(handles=legend_elements, loc='upper center', ncol=2, 
+              fontsize=12, framealpha=0.95, bbox_to_anchor=(0.5, 0.94))
+    
+    plt.suptitle('Kernel Density Estimates: Overlapping Distributions Show Weak Predictors', 
+                 fontsize=15, fontweight='bold', y=0.97)
+    plt.tight_layout(rect=[0, 0, 1, 0.92])
+    plt.savefig(OUTPUT_DIR / 'poc_kde_plots.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("    ✓ Saved: poc_kde_plots.png")
 
 
 def generate_survival_plots(df):

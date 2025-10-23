@@ -108,7 +108,7 @@ def plot_survival_analysis_2groups(
     p1 = n1 / total if total > 0 else 0
     p2 = 1 - p1
 
-    ax_plot.set_xlabel("Tenure (months)", fontsize=12, fontweight="semibold")
+    ax_plot.set_xlabel("Tenure (years)", fontsize=12, fontweight="semibold")
     ax_plot.set_ylabel("Survival Probability", fontsize=12, fontweight="semibold")
     ax_plot.set_ylim(0, 1.0)
     ax_plot.yaxis.set_major_locator(MultipleLocator(0.1))
@@ -360,7 +360,7 @@ def plot_survival_analysis_multigroup(
     total = sum(group_sizes)
     proportions = [n / total if total > 0 else 0 for n in group_sizes]
 
-    ax_plot.set_xlabel("Tenure (months)", fontsize=12, fontweight="semibold")
+    ax_plot.set_xlabel("Tenure (years)", fontsize=12, fontweight="semibold")
     ax_plot.set_ylabel("Survival Probability", fontsize=12, fontweight="semibold")
     ax_plot.set_ylim(0, 1.0)
     ax_plot.yaxis.set_major_locator(MultipleLocator(0.1))

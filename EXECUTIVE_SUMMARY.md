@@ -116,11 +116,11 @@ This analysis employed a **four-stage methodology**:
 
 **Key Plots:**
 
-![Overall Survival Curve](executive_summary_assets/09_overall_survival_curve.png)
+![Overall Survival Curve](img/09_overall_survival_curve.png)
 
-![Survival by Age Groups](executive_summary_assets/10_survival_age_groups.png)
+![Survival by Age Groups](img/10_survival_age_groups.png)
 
-![Cox PH Hazard Ratios](executive_summary_assets/14_cox_ph_coefficients.png)
+![Cox PH Hazard Ratios](img/14_cox_ph_coefficients.png)
 
 **Outcome:** 
 - **Cox PH Model C-index: 0.74** (Good predictive power)
@@ -163,11 +163,11 @@ This analysis employed a **four-stage methodology**:
 
 **Key Plots:**
 
-![Feature Importance Comparison](executive_summary_assets/15_feature_importance_comparison.png)
+![Feature Importance Comparison](img/15_feature_importance_comparison.png)
 
-![ROC Curve](executive_summary_assets/17_roc_curve.png)
+![ROC Curve](img/17_roc_curve.png)
 
-![SHAP Summary](executive_summary_assets/20_shap_summary.png)
+![SHAP Summary](img/20_shap_summary.png)
 
 **Outcome:**
 - **Final Model F1-Score: 62.52%** (12.4% improvement over baseline)
@@ -203,11 +203,11 @@ This analysis employed a **four-stage methodology**:
 
 **Key Plots:**
 
-![Model Comparison ROC](executive_summary_assets/21_model_comparison_roc.png)
+![Model Comparison ROC](img/21_model_comparison_roc.png)
 
-![Model Comparison Metrics](executive_summary_assets/24_model_comparison_metrics.png)
+![Model Comparison Metrics](img/24_model_comparison_metrics.png)
 
-![SMOTE vs Class Weight](executive_summary_assets/25_smote_roc_comparison.png)
+![SMOTE vs Class Weight](img/25_smote_roc_comparison.png)
 
 **Outcome:**
 - **Random Forest validated as optimal** (62.52% F1 vs 60.47-60.97% for alternatives)
@@ -247,7 +247,7 @@ This analysis employed a **four-stage methodology**:
 
 ### Finding #1: Complaint Status is the Dominant Predictor (Correlation: 0.996)
 
-![Complaint Impact](executive_summary_assets/07_complaint_impact.png)
+![Complaint Impact](img/07_complaint_impact.png)
 
 **Discovery:**
 - **99.5% of customers who file complaints churn** vs 0.05% of non-complainers
@@ -288,7 +288,7 @@ This feature is **too dominant** for traditional churn models - it will overshad
 
 ### Finding #2: Product Count Exhibits Extreme "Goldilocks" Effect
 
-![Products Churn Analysis](executive_summary_assets/04_products_churn_analysis.png)
+![Products Churn Analysis](img/04_products_churn_analysis.png)
 
 **Discovery:**
 A dramatic **U-shaped relationship** between product count and churn:
@@ -325,7 +325,7 @@ The sweet spot is remarkably narrow - **exactly 2 products**. Moving from 2→3 
 
 **Survival Analysis Confirmation:**
 
-![Survival by Number of Products](executive_summary_assets/11_survival_products.png)
+![Survival by Number of Products](img/11_survival_products.png)
 
 - **Survival curves dramatically diverge** for 3-4 products vs 1-2 products
 - Log-rank test: p < 0.001 (highly significant)
@@ -344,7 +344,7 @@ The sweet spot is remarkably narrow - **exactly 2 products**. Moving from 2→3 
 
 ### Finding #3: Age Exhibits Strong Lifecycle Churn Pattern (Correlation: 0.285)
 
-![Age Distribution Churn](executive_summary_assets/03_age_distribution_churn.png)
+![Age Distribution Churn](img/03_age_distribution_churn.png)
 
 **Discovery:**
 Clear **lifecycle-driven churn pattern** with peak vulnerability at pre-retirement:
@@ -401,7 +401,7 @@ The **51-60 cohort has nearly 8× the churn hazard** of young adults. This is th
 
 **Survival Curves:**
 
-![Survival by Age Groups](executive_summary_assets/10_survival_age_groups.png)
+![Survival by Age Groups](img/10_survival_age_groups.png)
 
 - Clear separation between age groups in Kaplan-Meier curves
 - 51-60 curve drops steeply (rapid churn)
@@ -417,7 +417,7 @@ The **51-60 cohort has nearly 8× the churn hazard** of young adults. This is th
 
 ### Finding #4: Activity Status Strongly Predicts Churn (Correlation: -0.156)
 
-![Active Member Impact](executive_summary_assets/05_active_member_impact.png)
+![Active Member Impact](img/05_active_member_impact.png)
 
 **Discovery:**
 - **Inactive members:** 26.9% churn rate
@@ -455,7 +455,7 @@ This helps explain why elderly customers are loyal despite general age-related c
 
 **Survival Analysis: Strongest Protective Factor**
 
-![Survival by Activity Status](executive_summary_assets/12_survival_active_status.png)
+![Survival by Activity Status](img/12_survival_active_status.png)
 
 Cox PH model identifies **active membership as the strongest modifiable protective factor**:
 - **Hazard Ratio: 0.54** (p < 0.005)
@@ -476,7 +476,7 @@ Cox PH model identifies **active membership as the strongest modifiable protecti
 
 ### Finding #5: Germany Market Has 2× Higher Churn (Geographic Disparity)
 
-![Geography Churn](executive_summary_assets/06_geography_churn.png)
+![Geography Churn](img/06_geography_churn.png)
 
 **Discovery:**
 Stark geographic churn disparity:
@@ -515,7 +515,7 @@ Germany represents **25% of customer base** but contributes **40% of total churn
 
 **Survival Analysis: Germany Hazard Quantification**
 
-![Survival by Geography](executive_summary_assets/13_survival_geography.png)
+![Survival by Geography](img/13_survival_geography.png)
 
 Cox PH model quantifies the Germany effect:
 - **Germany Hazard Ratio: 1.60×** (p < 0.005) vs France (baseline)
@@ -864,7 +864,7 @@ Beyond the top 5 findings, survival analysis revealed additional insights:
 
 ### Model Performance Metrics
 
-![Confusion Matrix](executive_summary_assets/16_confusion_matrix.png)
+![Confusion Matrix](img/16_confusion_matrix.png)
 
 **Test Set Performance:**
 
@@ -890,9 +890,9 @@ Beyond the top 5 findings, survival analysis revealed additional insights:
 
 ### Business Impact Translation
 
-![PDP: Age](executive_summary_assets/18_pdp_age.png)
+![PDP: Age](img/18_pdp_age.png)
 
-![PDP: Number of Products](executive_summary_assets/19_pdp_numofproducts.png)
+![PDP: Number of Products](img/19_pdp_numofproducts.png)
 
 **Current Model Capabilities:**
 

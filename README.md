@@ -1,10 +1,16 @@
 # Bank Customer Churn Analysis and Prediction
 
+> 📄 **[📖 Read the Full Research Report (PDF)](latex_report/report.pdf)** | A comprehensive 40+ page analysis integrating survival analysis and machine learning for banking churn prediction, including detailed methodology, statistical findings, business recommendations, and ROI projections.
+
+---
+
 Customer attrition, also known as customer churn, is the loss of clients or customers. In banking, the cost of retaining an existing customer is far less than acquiring a new one. Banks often use customer attrition analysis and prediction models as key business metrics.
 
 Predictive analytics use churn prediction models that assess customer propensity to churn by analyzing their characteristics and behaviors. Since these models generate prioritized lists of potential churners, they are effective at focusing retention efforts on customers most vulnerable to churn.
 
 In this project, I perform customer survival analysis and build a model to predict bank customer churn using data from a [multinational bank dataset on Kaggle](https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn/data). I also demonstrate how to understand individual customer churn risk and calculate expected customer lifetime value. This project builds upon the excellent [survival analysis + ML methodology by Archit Desai](https://github.com/archd3sai/Customer-Survival-Analysis-and-Churn-Prediction), adapted for banking sector churn with enhanced analytical tools.
+
+**This README provides a high-level overview.** For the complete research methodology, statistical analysis, and detailed business recommendations, please see the **[full research report](latex_report/report.pdf)**.
 
 ---
 
@@ -13,17 +19,18 @@ In this project, I perform customer survival analysis and build a model to predi
 This project analyzes **10,000 bank customers** with a baseline churn rate of **20.4%**. The analysis employs a three-stage methodology combining exploratory data analysis, survival analysis, and machine learning:
 
 **Key Findings:**
-- Complaint filing is the strongest churn predictor (99.5% of complainers churn)
-- Product count exhibits extreme non-linearity: 2 products is optimal (7.6% churn) while 3-4 products leads to 82-100% churn
-- Age shows strong lifecycle pattern with peak churn at ages 51-60 (56.2% churn rate)
-- Inactive members churn at nearly twice the rate of active members (26.9% vs 14.3%)
+- Complaint filing shows near-perfect correlation with churn (99.5% of complainers churn), but was intentionally excluded from the predictive model as a lagging indicator to enable proactive identification
+- Product count exhibits extreme non-linearity: 2 products is optimal (7.6% churn, n=4,590) while 3-4 products shows catastrophic churn (82.7% and 100% respectively, n=266 and n=60 with small sample sizes)
+- Age shows strong lifecycle pattern with peak churn at ages 51-60 (8× higher hazard ratio than young adults)
+- Inactive members face 1.88× higher churn risk than active members
 - Germany market has twice the churn rate of France/Spain markets
 
 **Final Model Performance:**
-- F1 Score: 62.52%
-- Accuracy: 85.85%
-- Recall: 57.84% (correctly identifies 236 of 408 churners)
-- ROC AUC: 85.85%
+- F1 Score: 62.5%
+- Accuracy: 85.9%
+- Precision: 68.0%
+- Recall: 57.8% (correctly identifies 236 of 408 churners on 2,000-sample test set)
+- ROC AUC: 0.858
 
 ---
 
@@ -56,7 +63,7 @@ bank_churn_project/
 │       ├── 03_feature_engineering.py
 │       └── advanced_modeling_utils.py
 │
-├── executive_summary_assets/
+├── img/
 │   └── (25 visualization PNG files)
 │
 ├── generate_executive_plots.py
@@ -71,7 +78,7 @@ bank_churn_project/
 
 **Survival Analysis:** Survival analysis is a set of methods for analyzing data where the outcome variable is the time until the occurrence of an event of interest. The event can be death, occurrence of a disease, customer churn, etc. The time to event can be measured in days, weeks, months, or years.
 
-For example, if the event of interest is customer churn, then the survival time is the tenure (in months) until a customer churns.
+For example, if the event of interest is customer churn, then the survival time is the tenure (in years) until a customer churns.
 
 **Objective:**
 The objective of this analysis is to utilize non-parametric and semi-parametric methods of survival analysis to answer the following questions:
@@ -81,14 +88,16 @@ The objective of this analysis is to utilize non-parametric and semi-parametric 
 - What is the survival and hazard curve of a specific customer?
 - What is the expected lifetime value of a customer?
 
+**Important Note:** The dataset uses **tenure measured in years** (not months), ranging from 0 to 10 years. This temporal scope enables modeling of lifecycle-driven churn patterns across the customer relationship lifecycle.
+
 ### Exploratory Data Analysis
 
 Before survival analysis, I performed comprehensive EDA to understand feature distributions and relationships with churn:
 
 <p align="center">
-<img src="executive_summary_assets/01_overall_churn_rate.png" width="300">
-<img src="executive_summary_assets/04_products_churn_analysis.png" width="450">
-<img src="executive_summary_assets/03_age_distribution_churn.png" width="450">
+<img src="img/01_overall_churn_rate.png" width="300">
+<img src="img/04_products_churn_analysis.png" width="450">
+<img src="img/03_age_distribution_churn.png" width="450">
 </p>
 
 From the above analysis, we can conclude:
@@ -100,26 +109,26 @@ From the above analysis, we can conclude:
 ### Kaplan-Meier Survival Curve
 
 <p align="center">
-<img src="executive_summary_assets/09_overall_survival_curve.png" width="500">
+<img src="img/09_overall_survival_curve.png" width="500">
 </p>
 
 From the above graph, we can observe:
-- The bank is able to retain more than 80% of its customers even after 10 months of tenure.
-- There is a relatively constant decrease in survival probability between 0-8 months.
-- After 8 months, the survival probability stabilizes, suggesting customers who stay beyond this period are more likely to remain long-term.
+- The bank is able to retain more than 80% of its customers even after 10 years of tenure.
+- Median customer lifetime exceeds 10 years of tenure for the majority of customers.
+- Churn risk accumulates gradually in the early years but accelerates markedly after approximately 7-8 years of tenure, indicating a critical intervention window for long-tenured customers.
 
 ### Log-Rank Test
 
 Log-rank test is carried out to analyze churning probabilities group-wise and to find if there is statistical significance between groups. The plots below show survival curves for different customer segments:
 
 <p align="center">
-<img src="executive_summary_assets/10_survival_age_groups.png" width="550">
-<img src="executive_summary_assets/12_survival_active_status.png" width="550">
+<img src="img/10_survival_age_groups.png" width="550">
+<img src="img/12_survival_active_status.png" width="550">
 </p>
 
 From the above graphs, we can conclude:
-- **Age groups show dramatic differences:** The 51-60 age group has significantly lower survival probability compared to younger customers. The 18-30 age group has the best retention.
-- **Activity status is a strong differentiator:** Inactive members have consistently lower survival probability compared to active members throughout the entire customer tenure.
+- **Age groups show dramatic differences:** The 51-60 age group has significantly lower survival probability compared to younger customers (Cox HR=7.94). The 18-30 age group has the best retention.
+- **Activity status is a strong differentiator:** Inactive members have consistently lower survival probability compared to active members throughout the entire customer tenure (Cox HR=0.54, meaning 46% risk reduction).
 - If a customer is young and active, they are significantly less likely to churn. Conversely, customers aged 50+ who become inactive are at highest risk.
 
 ### Survival Regression
@@ -127,10 +136,10 @@ From the above graphs, we can conclude:
 I use Cox Proportional Hazards model to perform survival regression on customer data. This model relates several risk factors simultaneously to survival time. In a Cox model, the measure of effect is the hazard ratio, which represents the risk of churning given specific customer characteristics.
 
 <p align="center">
-<img src="executive_summary_assets/14_cox_ph_coefficients.png" width="550">
+<img src="img/14_cox_ph_coefficients.png" width="550">
 </p>
 
-The model achieves a concordance index of 0.74 (good predictive power) and reveals:
+The model achieves a concordance index (C-index) of 0.74, indicating good discriminative power. All covariates satisfied the proportional hazards assumption (p ≥ 0.05), validating the hazard ratio interpretations. The results reveal:
 
 | Feature | Hazard Ratio | Interpretation |
 |---------|--------------|----------------|
@@ -150,7 +159,7 @@ I aim to implement a machine learning model to accurately predict if a customer 
 
 ### Modelling
 
-For the modelling, I use a tree-based ensemble method as we do not have strong linearity in this classification problem. I also have class imbalance (20% churn vs 80% retention), so I assign a class weight of 2:1 to penalize false negatives more heavily. I built the model on 80% of the data and validated on the remaining 20%, while ensuring no data leakage.
+For the modelling, I use a tree-based ensemble method as we do not have strong linearity in this classification problem. I also have class imbalance (20.4% churn vs 79.6% retention), so I assign a class weight of 2:1 to penalize false negatives more heavily. I built the model on 80% of the data (training set) and validated on the remaining 20% (test set with 2,000 samples), while ensuring no data leakage. Weak features with minimal linear correlation (|r| < 0.10) were excluded: satisfaction_score, point_earned, estimated_salary, credit_score, tenure, and card_type. Complaint status was intentionally excluded as a lagging indicator that would create a methodological degenerate case (85.9% accuracy with genuine pattern discovery vs 99%+ accuracy with complaint status that identifies customers who have already decided to leave).
 
 The Random Forest model has many hyperparameters, and I tuned them using a 4-stage sequential grid search (73 combinations tested) while ensuring I did not overfit. The final model configuration:
 
@@ -167,14 +176,14 @@ RandomForestClassifier(
 )
 ```
 
-The final model resulted in a **0.63 F1 score** and **0.86 ROC-AUC**, with significant improvement in recall (+21%) compared to baseline. The resulting plots can be seen below:
+Cross-validation on the training set yielded mean F1-score of 59.6% (SD: 1.8%), indicating stable performance across different data splits. On the 2,000-sample test set, the final model achieved **62.5% F1 score**, **85.9% accuracy**, **68.0% precision**, **57.8% recall**, and **0.858 ROC-AUC**. Recall improved by 21 percentage points compared to the untuned baseline, correctly identifying 236 of 408 churners while maintaining reasonable precision (111 false positives). The resulting plots can be seen below:
 
 <p align="center">
-<img src="executive_summary_assets/15_feature_importance_comparison.png" width="600">
+<img src="img/15_feature_importance_comparison.png" width="600">
 </p>
 
 <p align="center">
-<img src="executive_summary_assets/17_roc_curve.png" width="500">
+<img src="img/17_roc_curve.png" width="500">
 </p>
 
 From the feature importance plot, we can see which features govern customer churn. Age, number of products, and activity status are the dominant predictors.
@@ -187,32 +196,32 @@ To ensure our Random Forest model was optimal, we conducted three validation exp
 Tested XGBoost and LightGBM against Random Forest:
 
 <p align="center">
-<img src="executive_summary_assets/21_model_comparison_roc.png" width="500">
+<img src="img/21_model_comparison_roc.png" width="500">
 </p>
 
 <p align="center">
-<img src="executive_summary_assets/24_model_comparison_metrics.png" width="900">
+<img src="img/24_model_comparison_metrics.png" width="900">
 </p>
 
-**Results:** Random Forest achieved the best F1-Score (62.52%) outperforming both XGBoost (60.47%) and LightGBM (60.97%).
+**Results:** Random Forest achieved the best F1-Score (62.5%) outperforming both XGBoost (60.5%) and LightGBM (61.0%). Random Forest demonstrated more stable generalization across folds.
 
 **Experiment 2: SMOTE vs Class Weight**
 Compared SMOTE oversampling to class_weight approach:
 
 <p align="center">
-<img src="executive_summary_assets/22_smote_class_distribution.png" width="600">
+<img src="img/22_smote_class_distribution.png" width="600">
 </p>
 
 <p align="center">
-<img src="executive_summary_assets/25_smote_roc_comparison.png" width="500">
+<img src="img/25_smote_roc_comparison.png" width="500">
 </p>
 
-**Results:** Class weight achieved better precision (68.01% vs 56.18%) and F1-Score (62.52% vs 60.57%). SMOTE improved recall but created excessive false alarms.
+**Results:** Class weight achieved better precision (68.0% vs 56.2%) and F1-Score (62.5% vs 60.6%). SMOTE increased recall at the expense of a substantial rise in false positives; class weights offered a more balanced trade-off.
 
 **Experiment 3: Feature Engineering**
 Tested 14 engineered features (interactions, polynomials, bins):
 
-**Results:** Baseline features outperformed engineered features (62.52% vs 62.09% F1-Score). Random Forest captures interactions automatically through tree splits.
+**Results:** Baseline features outperformed engineered features (62.5% vs 62.1% F1-Score). Random Forest captures interactions automatically through tree splits, underscoring that tree-based methods inherently capture non-linear interactions.
 
 **Conclusion:** All experiments validated our Random Forest configuration with class_weight and baseline features as optimal. See `03_churn_prediction/model_validation_experiments/` for detailed results.
 
@@ -227,18 +236,18 @@ We can explain and understand the Random Forest model using explainable AI modul
 **2. Partial Dependence Plots** are used to see how churning probability changes across the range of a particular feature. For example, in the plot below for age, the churn probability increases dramatically after age 45.
 
 <p align="center">
-<img src="executive_summary_assets/18_pdp_age.png" width="450">
-<img src="executive_summary_assets/19_pdp_numofproducts.png" width="450">
+<img src="img/18_pdp_age.png" width="450">
+<img src="img/19_pdp_numofproducts.png" width="450">
 </p>
 
 From the partial dependence plots we can observe:
-- **Age**: Churn probability remains low and relatively flat until age 40, then begins to increase. After age 50, the probability increases sharply, peaking around ages 55-60.
-- **Number of Products**: The plot shows a clear U-shape. Customers with 2 products have the lowest churn probability. Having only 1 product slightly increases risk, while having 3-4 products dramatically increases churn probability.
+- **Age**: Churn probability remains low and relatively flat until age 40, then begins to increase. After age 50, the probability increases sharply, peaking around ages 55-60. This confirms the near-monotonic increase in churn probability with age observed in the Cox model.
+- **Number of Products**: The plot shows a clear U-shape. Customers with 2 products have the lowest churn probability. Having only 1 product slightly increases risk, while having 3-4 products dramatically increases churn probability. This validates the "Goldilocks" effect identified in exploratory analysis.
 
 **3. SHAP values** (SHapley Additive exPlanations) is a game-theoretic approach to explain the output of any machine learning model. It shows why a particular customer's churning probability differs from the baseline and which features cause this difference.
 
 <p align="center">
-<img src="executive_summary_assets/20_shap_summary.png" width="550">
+<img src="img/20_shap_summary.png" width="550">
 </p>
 
 The SHAP summary plot shows:
@@ -281,9 +290,9 @@ Based on the analysis, the following interventions would be most effective at re
 
 3. **Re-Engage Inactive Members**: Inactive members churn at twice the rate of active members. Automated re-engagement campaigns (email, SMS, incentives) targeting customers who haven't transacted in 60+ days would reduce preventable churn.
 
-4. **Investigate Germany Market**: Germany has twice the churn rate of France/Spain. Root cause analysis (customer surveys, competitive analysis, service quality audit) is needed to identify and fix market-specific issues.
+4. **Investigate Germany Market**: Germany has twice the churn rate of France/Spain (Cox HR=1.60). Root cause analysis (customer surveys, competitive analysis, service quality audit) is needed to identify and fix market-specific issues, potentially through localized products, improved language support, and competitive pricing.
 
-5. **Complaint Prevention System**: 99.5% of customers who file complaints churn. Focus on proactive issue resolution and service quality improvements to prevent complaints rather than attempting to resolve them after filing.
+5. **Proactive Risk Scoring**: The Random Forest model identifies 236 of 408 churners (57.8% recall) before they exit, enabling targeted interventions. While 172 churners remain undetected (representing potential $344k annual revenue loss assuming $2,000 CLV), the 68.0% precision ensures retention efforts target genuinely at-risk customers efficiently.
 
 ---
 
@@ -384,6 +393,8 @@ As we know, it is much more expensive to sign in a new client than keeping an ex
 This project was inspired by and builds upon the excellent work of [**Archit Desai**](https://github.com/archd3sai/Customer-Survival-Analysis-and-Churn-Prediction). The original repository provided the foundational methodology for combining survival analysis with machine learning for churn prediction. 
 
 While the original project focused on telecom customer churn, this implementation explores banking sector churn with enhanced analytical tools and reproducible workflows.
+
+> 💡 **Interested in the full research methodology?** Read the **[complete 40+ page research report](latex_report/report.pdf)** for detailed statistical analysis, methodology documentation, business recommendations, and ROI projections.
 
 ---
 

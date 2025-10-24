@@ -151,7 +151,7 @@ The baseline churn rate in the dataset is 20.4~\%, corresponding to 2,038 custom
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.5\textwidth]{img/04_products_donut_chart.png}
+\includegraphics[width=0.5\textwidth]{../img/04_products_donut_chart.png}
 \caption{Overall customer churn rate distribution. Baseline churn rate is 20.4\%.}
 \label{fig:churn_rate}
 \end{figure}
@@ -161,28 +161,28 @@ A "Goldilocks" effect was observed with respect to the number of products owned:
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{img/04_products_churn_analysis.png}
+\includegraphics[width=0.7\textwidth]{../img/04_products_churn_analysis.png}
 \caption{Product count analysis revealing "Goldilocks" effect. Customers with exactly 2 products show optimal retention.}
 \label{fig:products}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{img/03_age_distribution_churn.png}
+\includegraphics[width=0.7\textwidth]{../img/03_age_distribution_churn.png}
 \caption{Age lifecycle pattern in churn risk. Peak vulnerability occurs at 51–60 years.}
 \label{fig:age}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{img/08_churn_rate_violin_hybridv2.png}
+\includegraphics[width=0.9\textwidth]{../img/08_churn_rate_violin_hybridv2.png}
 \caption{Activity status impact on churn risk. Inactive members exhibit 1.88× higher churn risk than active members.}
 \label{fig:active}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{img/02_demographic_overview.png}
+\includegraphics[width=0.9\textwidth]{../img/02_demographic_overview.png}
 \caption{Demographic overview showing geographic churn disparity. Germany exhibits churn rates 2× higher than France and Spain.}
 \label{fig:geography}
 \end{figure}
@@ -192,7 +192,7 @@ Linear correlation analysis with churn revealed distinct tiers of predictive str
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{img/feature_selection_comparison.png}
+\includegraphics[width=0.7\textwidth]{../img/feature_selection_comparison.png}
 \caption{Feature selection rationale comparing strong (|r| $\geq$ 0.10) and weak (|r| $<$ 0.10) predictors. Strong predictors (red) were retained for modeling; weak predictors (gray) were excluded. Complaint status shows near‑perfect correlation (r=0.996) but is excluded as a lagging indicator.}
 \label{fig:feature_selection}
 \end{figure}
@@ -203,7 +203,7 @@ Kernel density estimates for excluded continuous features (Figure~\ref{fig:kde_w
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{img/poc_kde_plots.png}
+\includegraphics[width=0.75\textwidth]{../img/poc_kde_plots.png}
 \caption{Kernel density estimates for excluded continuous features. Near‑complete overlap between churned (red) and retained (green) distributions confirms these features lack discriminatory power, visually validating their weak correlation values.}
 \label{fig:kde_weak}
 \end{figure}
@@ -212,7 +212,7 @@ Pearson correlation analysis (Figure~\ref{fig:correlation}) revealed non‑linea
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{img/08_correlation_heatmap.png}
+\includegraphics[width=0.8\textwidth]{../img/08_correlation_heatmap.png}
 \caption{Feature correlation heatmap. Complaint status shows near‑perfect correlation with churn (r=0.996). Moderate correlations exist for age, number of products, and activity status.}
 \label{fig:correlation}
 \end{figure}
@@ -227,28 +227,28 @@ Kaplan–Meier curves were computed for various customer segments (Figure~\ref{f
 \centering
 \begin{subfigure}[b]{0.48\textwidth}
 \centering
-\includegraphics[width=\textwidth]{img/09_overall_survival_curve_plot.png}
+\includegraphics[width=\textwidth]{../img/09_overall_survival_curve_plot.png}
 \caption{Overall}
 \label{fig:survival_overall}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.48\textwidth}
 \centering
-\includegraphics[width=\textwidth]{img/11_survival_products_plot.png}
+\includegraphics[width=\textwidth]{../img/11_survival_products_plot.png}
 \caption{By Product Count}
 \label{fig:survival_products}
 \end{subfigure}
 \vskip\baselineskip
 \begin{subfigure}[b]{0.48\textwidth}
 \centering
-\includegraphics[width=\textwidth]{img/10_survival_age_groups_plot.png}
+\includegraphics[width=\textwidth]{../img/10_survival_age_groups_plot.png}
 \caption{By Age Groups}
 \label{fig:survival_age}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.48\textwidth}
 \centering
-\includegraphics[width=\textwidth]{img/12_survival_active_status_plot.png}
+\includegraphics[width=\textwidth]{../img/12_survival_active_status_plot.png}
 \caption{By Activity Status}
 \label{fig:survival_active}
 \end{subfigure}
@@ -281,7 +281,7 @@ The cumulative hazard function \(H(t) = -\ln(S(t))\) provides a complementary pe
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{img/cumulative_hazard_plot.png}
+\includegraphics[width=0.7\textwidth]{../img/cumulative_hazard_plot.png}
 \caption{Cumulative hazard function for representative customer with 3 years tenure. Accelerating hazard rate after 7–8 years identifies critical intervention window for long‑tenured customers.}
 \label{fig:cumulative_hazard}
 \end{figure}
@@ -319,7 +319,7 @@ The Cox model achieved a concordance index (C‑index) of 0.74, indicating good 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{img/14_cox_ph_coefficients.png}
+\includegraphics[width=0.7\textwidth]{../img/14_cox_ph_coefficients.png}
 \caption{Cox Proportional Hazards model coefficients. Hazard ratios quantify relative churn risk for each feature.}
 \label{fig:cox_coefficients}
 \end{figure}
@@ -374,7 +374,7 @@ Receiver‑operating characteristic (ROC) curves yielded an area under the curve
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{img/17_roc_curve.png}
+\includegraphics[width=0.6\textwidth]{../img/17_roc_curve.png}
 \caption{ROC curve demonstrating model discriminative power. Area under curve (AUC) equals 0.858.}
 \label{fig:roc_curve}
 \end{figure}
@@ -412,14 +412,14 @@ Partial dependence analysis (Figure~\ref{fig:pdp_age}) confirmed the near‑mono
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{img/15_feature_importance_comparison.png}
+\includegraphics[width=0.8\textwidth]{../img/15_feature_importance_comparison.png}
 \caption{Feature importance comparison using impurity measures, permutation importance, and SHAP values. Age and number of products emerge as most influential predictors.}
 \label{fig:feature_importance}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{img/18_pdp_age.png}
+\includegraphics[width=0.6\textwidth]{../img/18_pdp_age.png}
 \caption{Partial dependence plot for age. Near‑monotonic increase in churn probability peaks at 51–60 years.}
 \label{fig:pdp_age}
 \end{figure}
@@ -427,7 +427,7 @@ Partial dependence analysis (Figure~\ref{fig:pdp_age}) confirmed the near‑mono
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{img/20_shap_summary.png}
+\includegraphics[width=0.7\textwidth]{../img/20_shap_summary.png}
 \caption{SHAP summary plot showing feature contributions across all predictions. Blue bars indicate protective effects; red bars indicate increased churn risk.}
 \label{fig:shap}
 \end{figure}
@@ -438,7 +438,7 @@ For operational deployment, customers can be segmented into action tiers based o
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{img/26_shap_waterfall.png}
+\includegraphics[width=\textwidth]{../img/26_shap_waterfall.png}
 \caption{SHAP waterfall plot for individual customer prediction. Each feature's contribution appears as colored bars: blue decreases risk, red increases risk. Prediction evolves from baseline average to final probability.}
 \label{fig:shap_waterfall}
 \end{figure}
@@ -466,21 +466,21 @@ To ensure robustness, the random forest was compared against two gradient‑boos
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{img/21_model_comparison_roc.png}
+\includegraphics[width=0.7\textwidth]{../img/21_model_comparison_roc.png}
 \caption{ROC curve comparison across three algorithms. Random Forest achieves highest discriminative power (AUC = 0.858).}
 \label{fig:model_comparison}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{img/24_model_comparison_metrics.png}
+\includegraphics[width=0.9\textwidth]{../img/24_model_comparison_metrics.png}
 \caption{Model performance deviation from Random Forest baseline. Both XGBoost and LightGBM underperform across most metrics.}
 \label{fig:metrics_comparison}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{img/25_smote_roc_comparison.png}
+\includegraphics[width=0.7\textwidth]{../img/25_smote_roc_comparison.png}
 \caption{SMOTE versus class weight ROC comparison. SMOTE increases recall at the expense of higher false positive rate.}
 \label{fig:smote_roc}
 \end{figure}

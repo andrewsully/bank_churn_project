@@ -379,7 +379,7 @@ ax.text(0.5, 0.5, table_text, ha='center', va='center',
 ax.set_title('Best Model Ranking', fontsize=14, fontweight='bold', pad=15)
 
 plt.tight_layout()
-plt.savefig('executive_summary_assets/24_model_comparison_metrics.png', dpi=300, bbox_inches='tight')
+plt.savefig('../../img/24_model_comparison_metrics.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 # %% [markdown]

@@ -1,6 +1,6 @@
 """
 Generate all plots for Executive Summary
-Saves high-quality PNGs to executive_summary_assets/
+Saves high-quality PNGs to img/
 
 Usage:
     python generate_executive_plots.py --section eda
@@ -39,8 +39,8 @@ plt.rcParams['xtick.direction'] = 'out'
 plt.rcParams['ytick.direction'] = 'out'
 plt.ioff()  # Turn off interactive mode
 
-# Output directory
-OUTPUT_DIR = Path('executive_summary_assets')
+# Output directory - central location for all images
+OUTPUT_DIR = Path('img')
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Import custom utilities

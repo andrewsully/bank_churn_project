@@ -395,7 +395,7 @@ This project was inspired by and builds upon the excellent work of [**Archit Des
 
 While the original project focused on telecom customer churn, this implementation explores banking sector churn with enhanced analytical tools and reproducible workflows.
 
-> 💡 **Interested in the full research methodology?** Read the **[complete 40+ page research report](research_report.pdf)** for detailed statistical analysis, methodology documentation, business recommendations, and ROI projections. LaTeX source files available in [`research_report/`](research_report/).
+> 💡 **Interested in the full research methodology?** Read the **[complete 30+ page research report](research_report.pdf)** for detailed statistical analysis, methodology documentation, business recommendations, and ROI projections. LaTeX source files available in [`research_report/`](research_report/).
 
 ---
 

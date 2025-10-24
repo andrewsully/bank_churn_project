@@ -102,9 +102,9 @@ example2_analysis.ipynb
 *.lot
 
 # LaTeX report folder - ignore everything except essential files
-latex_report/*
-!latex_report/report.pdf
-!latex_report/report.tex
-!latex_report/references.bib
-!latex_report/compile.sh
-!latex_report/
+research_report/*
+!research_report/research_report.tex
+!research_report/references.bib
+!research_report/compile.sh
+!research_report/
+# Note: research_report.pdf is intentionally NOT in research_report/ - it's in root for GitHub viewing

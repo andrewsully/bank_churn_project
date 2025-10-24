@@ -1,6 +1,6 @@
 # Bank Customer Churn Analysis and Prediction
 
-> 📄 **[📖 Read the Full Research Report (PDF)](latex_report/report.pdf)** | A comprehensive 40+ page analysis integrating survival analysis and machine learning for banking churn prediction, including detailed methodology, statistical findings, business recommendations, and ROI projections.
+> 📄 **[📖 Read the Full Research Report (PDF)](research_report.pdf)** | A comprehensive 40+ page analysis integrating survival analysis and machine learning for banking churn prediction, including detailed methodology, statistical findings, business recommendations, and ROI projections.
 
 ---
 
@@ -10,7 +10,7 @@ Predictive analytics use churn prediction models that assess customer propensity
 
 In this project, I perform customer survival analysis and build a model to predict bank customer churn using data from a [multinational bank dataset on Kaggle](https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn/data). I also demonstrate how to understand individual customer churn risk and calculate expected customer lifetime value. This project builds upon the excellent [survival analysis + ML methodology by Archit Desai](https://github.com/archd3sai/Customer-Survival-Analysis-and-Churn-Prediction), adapted for banking sector churn with enhanced analytical tools.
 
-**This README provides a high-level overview.** For the complete research methodology, statistical analysis, and detailed business recommendations, please see the **[full research report](latex_report/report.pdf)**.
+**This README provides a high-level overview.** For the complete research methodology, statistical analysis, and detailed business recommendations, please see the **[full research report](research_report.pdf)**. LaTeX source files are available in [`research_report/`](research_report/) for reproducibility.
 
 ---
 
@@ -394,7 +394,7 @@ This project was inspired by and builds upon the excellent work of [**Archit Des
 
 While the original project focused on telecom customer churn, this implementation explores banking sector churn with enhanced analytical tools and reproducible workflows.
 
-> 💡 **Interested in the full research methodology?** Read the **[complete 40+ page research report](latex_report/report.pdf)** for detailed statistical analysis, methodology documentation, business recommendations, and ROI projections.
+> 💡 **Interested in the full research methodology?** Read the **[complete 40+ page research report](research_report.pdf)** for detailed statistical analysis, methodology documentation, business recommendations, and ROI projections. LaTeX source files available in [`research_report/`](research_report/).
 
 ---
 

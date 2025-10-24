@@ -95,9 +95,9 @@ The objective of this analysis is to utilize non-parametric and semi-parametric 
 Before survival analysis, I performed comprehensive EDA to understand feature distributions and relationships with churn:
 
 <p align="center">
-<img src="img/01_overall_churn_rate.png" width="300">
-<img src="img/04_products_churn_analysis.png" width="450">
-<img src="img/03_age_distribution_churn.png" width="450">
+<img src="img/01_overall_churn_rate.png" height="150">
+<img src="img/04_products_churn_analysis.png" height="150">
+<img src="img/03_age_distribution_churn.png" height="150">
 </p>
 
 From the above analysis, we can conclude:
@@ -236,13 +236,11 @@ We can explain and understand the Random Forest model using explainable AI modul
 **2. Partial Dependence Plots** are used to see how churning probability changes across the range of a particular feature. For example, in the plot below for age, the churn probability increases dramatically after age 45.
 
 <p align="center">
-<img src="img/18_pdp_age.png" width="450">
-<img src="img/19_pdp_numofproducts.png" width="450">
+<img src="img/18_pdp_age.png" width="600">
 </p>
 
-From the partial dependence plots we can observe:
-- **Age**: Churn probability remains low and relatively flat until age 40, then begins to increase. After age 50, the probability increases sharply, peaking around ages 55-60. This confirms the near-monotonic increase in churn probability with age observed in the Cox model.
-- **Number of Products**: The plot shows a clear U-shape. Customers with 2 products have the lowest churn probability. Having only 1 product slightly increases risk, while having 3-4 products dramatically increases churn probability. This validates the "Goldilocks" effect identified in exploratory analysis.
+From the partial dependence plot we can observe:
+- **Age**: Churn probability remains low and relatively flat until age 40, then begins to increase. After age 50, the probability increases sharply, peaking around ages 55-60. This confirms the near-monotonic increase in churn probability with age observed in the Cox model. The U-shaped effect for number of products was validated in exploratory analysis: customers with exactly 2 products show optimal retention (7.6% churn), while those with 3-4 products face dramatically higher churn rates (82-100%).
 
 **3. SHAP values** (SHapley Additive exPlanations) is a game-theoretic approach to explain the output of any machine learning model. It shows why a particular customer's churning probability differs from the baseline and which features cause this difference.
 

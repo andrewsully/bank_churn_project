@@ -56,7 +56,6 @@ bank_churn_project/
 │   ├── 03_churnprediction.ipynb
 │   ├── 03_churnprediction.py
 │   ├── modeling_utils.py
-│   ├── checkpoints/
 │   └── model_validation_experiments/
 │       ├── 01_model_comparison.py
 │       ├── 02_smote_experiment.py

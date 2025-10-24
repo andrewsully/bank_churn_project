@@ -1,6 +1,6 @@
 # Bank Customer Churn Analysis and Prediction
 
-> 📄 **[📖 Read the Full Research Report (PDF)](research_report.pdf)** | A comprehensive 40+ page analysis integrating survival analysis and machine learning for banking churn prediction, including detailed methodology, statistical findings, business recommendations, and ROI projections.
+> 📄 **[📖 Read the Full Research Report (PDF)](research_report.pdf)** | A comprehensive 30+ page analysis integrating survival analysis and machine learning for banking churn prediction, including detailed methodology, statistical findings, business recommendations, and ROI projections.
 
 ---
 

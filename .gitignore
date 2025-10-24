@@ -55,8 +55,8 @@ venv.bak/
 checkpoints/*.pkl
 checkpoints/*.bz2
 
-# Data files (optional - comment out if you want to commit small datasets)
-*.csv
+# Data files - exclude large datasets, keep small public datasets
+# *.csv  # Commented out to allow small public datasets
 *.xlsx
 *.parquet
 *.feather

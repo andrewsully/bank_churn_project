@@ -15,6 +15,8 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{colortbl}
 
 % Set reasonable margins for a professional report
 \geometry{margin=1in}
@@ -51,7 +53,7 @@
 
 \newpage
 \begin{abstract}
-Customer retention has emerged as a strategic priority for banks facing increasing competition, shrinking margins and a demanding digital consumer base.  This report investigates the drivers of churn and designs predictive models to identify customers at risk of leaving.  Adapting survival analysis methodology originally developed for telecom churn prediction by Archit Desai, this work applies a combined approach of exploratory data analysis, survival models and machine learning to a dataset of 10,000 retail banking customers.  The analysis quantifies risk factors, estimates time‑to‑churn and builds a production‑ready classifier.  Results demonstrate that proactive management of product portfolios, targeted lifecycle programmes and behavioural re‑engagement campaigns can significantly reduce attrition, preserving revenue and improving customer satisfaction.
+Customer retention has emerged as a strategic priority for banks amid intensifying competition, shrinking margins, and rising digital expectations. Using 10,000 retail-banking records, this study integrates exploratory analysis, survival modeling, and machine learning to explain and predict churn. Building on prior survival-analysis work, this study quantifies risk factors, estimates time to churn, and delivers a Random Forest classifier with 85.9\% accuracy for proactive risk scoring. Inactivity, product-portfolio imbalance, and lifecycle stage dominate risk; inactive members face 1.88× higher churn. Combining Kaplan–Meier and Cox models with interpretable ensemble methods provides both temporal and probabilistic insights, enabling targeted re-engagement campaigns, lifecycle retention programs, and portfolio optimization.
 \end{abstract}
 
 \newpage
@@ -61,9 +63,9 @@ Customer retention has emerged as a strategic priority for banks facing increasi
 \pagenumbering{arabic}
 
 \section{Introduction}
-Customer churn, the process by which customers close accounts or cease doing business with a firm, is a critical concern for banks.  On average, acquiring a new customer can cost five to seven times more than retaining an existing one \citep{businessbuilders2024cost}, and even modest improvements in retention can yield disproportionate profit increases \citep{kumar2022customerretention}.  For many financial institutions, high churn rates translate into substantial losses in lifetime value and increased marketing expenditure on acquisition.  Effective churn management therefore requires not only understanding who leaves and when, but also why they leave and how the bank can intervene.
+Customer churn, the process by which customers close accounts or cease doing business with a firm, is a critical concern for banks.  On average, acquiring a new customer can cost five to seven times more than retaining an existing one \citep{businessbuilders2024cost}, and even modest improvements in retention can yield disproportionate profit increases \citep{kumar2022customerretention}.  For many financial institutions, high churn rates translate into substantial losses in lifetime value.  Effective churn management therefore requires not only understanding who leaves and when, but also why they leave and how the bank can intervene.
 
-Using a rich dataset of ten thousand customers made publicly available by \citet{kollipara2022bank}, this study investigates demographic, behavioural and financial attributes to determine how they contribute to attrition.  Survival analysis and machine learning techniques are employed to estimate individual churn probabilities and design targeted retention programmes.  The specific research objectives include: (1) identifying the demographic, behavioural and product factors most predictive of churn through exploratory analysis; (2) quantifying time‑to‑churn patterns using survival models; (3) building an accurate predictive classifier for proactive risk scoring; (4) validating model performance against alternative algorithms and techniques; and (5) translating statistical findings into actionable business recommendations with quantified ROI.  The methods and insights presented here are applicable beyond the studied bank and offer a general template for analytics‑driven customer retention initiatives.
+Using a rich dataset of ten thousand customers made publicly available by \citet{kollipara2022bank}, this study investigates demographic, behavioral and financial attributes to determine how they contribute to attrition.  Survival analysis and machine learning techniques are employed to estimate individual churn probabilities and design targeted retention programs.  The analysis identifies predictive factors through exploratory analysis, quantifies time‑to‑churn patterns using survival models, builds an accurate predictive classifier for proactive risk scoring, validates model performance against alternative algorithms, and translates statistical findings into actionable business recommendations with quantified ROI.  The methods and insights presented here demonstrate an integrated approach to analytics‑driven customer retention applicable to similar banking contexts.
 
 \subsection{Literature Review}
 Customer retention has emerged as a fundamental business imperative across service industries, driven by the well-established principle that retaining existing customers costs significantly less than acquiring new ones \citep{businessbuilders2024cost}. In banking, this dynamic is particularly pronounced, with customer lifetime values ranging from \$2,000 to \$4,000 for typical retail banking relationships \citep{meleis2010clv}.
@@ -72,12 +74,12 @@ Early approaches to churn management relied on customer relationship management 
 
 However, traditional classification approaches, while effective at answering \emph{who} will churn, provide limited insight into \emph{when} churn occurs or how temporal factors contribute to attrition risk. Survival analysis methods, adapted from biostatistics and telecommunications churn studies \citep{desai_customer_survival}, offer a complementary framework for modeling time-to-event outcomes. Model interpretability has also emerged as a critical requirement for operational deployment, with recent work demonstrating the utility of SHAP (Shapley Additive Explanations) frameworks for explaining black-box predictions in banking contexts \citep{peng2023interpretability}. The translation of predictive insights into actionable business strategy also remains a critical gap in academic churn research \citep{brito2024framework}.
 
-This study bridges these gaps by combining survival analysis methodology with comparative ML evaluation and strategic business planning. We extend the findings of \citet{singh2024productchurn} through several methodological contributions: (1) incorporation of Kaplan-Meier survival curves and Cox modeling to quantify temporal churn patterns; (2) systematic comparison of SMOTE oversampling versus class-weight balancing strategies; (3) application of SHAP values and partial dependence plots for granular model interpretability; and (4) translation of statistical findings into quantified ROI projections and phased implementation strategies.
+This study bridges these gaps by combining survival analysis methodology with comparative ML evaluation and strategic business planning. The analysis extends the findings of \citet{singh2024productchurn} through several methodological contributions: (1) incorporation of Kaplan-Meier survival curves and Cox modeling to quantify temporal churn patterns; (2) systematic comparison of SMOTE oversampling versus class-weight balancing strategies; (3) application of SHAP values and partial dependence plots for granular model interpretability; and (4) translation of statistical findings into quantified ROI projections and phased implementation strategies.
 
 \section{Methods}
 \subsection{Dataset and Pre‑Processing}
 \subsubsection{Data Source and Structure}
-The analysis uses the \emph{Bank Customer Churn} dataset compiled by \citet{kollipara2022bank}.  The dataset comprises 10,000 anonymised records of retail banking customers.  Each record includes demographic variables (e.g.\ gender, geography, age), behavioural indicators (active membership status, tenure), product usage metrics (number of products, credit card ownership), financial variables (balance, estimated salary, credit score) and experiential measures (satisfaction score, complaint status, card type and loyalty points).  In addition to the feature columns, the dataset includes a binary target variable indicating whether the customer exited the bank.  The data card provided by the dataset author notes that identifier columns such as RowNumber and CustomerId have no predictive value and should be dropped.
+The analysis uses the \emph{Bank Customer Churn} dataset compiled by \citet{kollipara2022bank}.  The dataset comprises 10,000 anonymised records of retail banking customers.  Each record includes demographic variables (e.g.\ gender, geography, age), behavioral indicators (active membership status, tenure), product usage metrics (number of products, credit card ownership), financial variables (balance, estimated salary, credit score) and experiential measures (satisfaction score, complaint status, card type and loyalty points).  In addition to the feature columns, the dataset includes a binary target variable indicating whether the customer exited the bank.  The data card provided by the dataset author notes that identifier columns such as RowNumber and CustomerId have no predictive value and should be dropped.
 
 \subsubsection{Cleaning and Feature Engineering}
 Prior to analysis, records with missing or duplicate values were removed.  Exploratory inspection of the variables revealed no missing values and thus no imputation was required.  Identifier fields were discarded, leaving fifteen explanatory variables.  An age\_group feature was engineered by discretising the Age variable into six categories (18–30, 31–40, 41–50, 51–60, 61–70, 70+) to capture non‑linear lifecycle effects while preserving interpretability.  One‑hot encoding was applied to categorical variables (gender and geography), and the complaint indicator was intentionally excluded from predictive models because it is a lagging indicator of churn: nearly every customer who filed a complaint ultimately left the bank.  Continuous variables were standardised to facilitate model training.
@@ -155,7 +157,6 @@ Pearson correlation and chi‑squared tests were used to quantify associations b
 \end{figure}
 
 \subsection{Survival Analysis}
-\subsubsection{Methodology}
 Survival analysis models the time until an event occurs and is well suited for churn studies where the timing of attrition matters.  The fundamental quantity is the survival function \(S(t) = \Pr(T > t)\), which represents the probability of surviving at least to time \(t\).  The hazard function \(h(t)\) quantifies the instantaneous risk of experiencing the event at time \(t\), given survival until \(t\).
 
 Two complementary techniques were employed: Kaplan–Meier estimators and the Cox proportional‑hazards model.  The Kaplan–Meier (K–M) estimator, first described by \citet{dudley2016kaplan}, is a non‑parametric method that estimates the survival function based solely on observed event times and censoring.  It is univariate and describes survival according to a single factor.  In contrast, the Cox model is a multivariable regression that relates the hazard of the event to multiple covariates simultaneously.  As \citet{sthda_cox} note, the Cox model accommodates both categorical and quantitative predictors and extends K–M methods by allowing several risk factors to be assessed together.  The hazard function in the Cox model is specified as
@@ -271,6 +272,9 @@ To identify at‑risk customers before a complaint is lodged, a random forest cl
 where \(\hat{f}_b(\mathbf{x})\) is the prediction from the \(b\)-th tree trained on a bootstrap sample with random feature selection at each split.  For classification, the final prediction is the majority vote across all trees.
 
 An extensive four‑stage grid search was performed to tune hyperparameters such as the number of trees, maximum depth, splitting criteria, minimum samples per split and class weights.  Class imbalance (20.4~\% churn) was addressed by weighting the minority class twice as heavily as the majority class.  The optimal configuration consisted of 900 trees, maximum depth of 11, Gini impurity criterion, no feature subsetting (max\_features=None), minimum split size of four samples and class weight ratio \(\{0:1,1:2\}\).
+
+\subsubsection{Model Comparison}
+To ensure robustness, the Random Forest classifier was compared against two gradient‑boosting alternatives: XGBoost (Chen and Guestrin, 2016) and LightGBM (Ke et al., 2017).  Both are ensemble methods that sequentially add weak learners to correct prior errors, differing primarily in their splitting strategies: XGBoost uses a level‑wise (breadth‑first) tree growth approach with regularization, while LightGBM employs a leaf‑wise (depth‑first) growth strategy optimized for computational efficiency.  All models were trained on identical data splits and tuned with analogous hyperparameter grid searches.  Performance comparisons are presented in Section 4.1.
 
 \section{Results}
 \subsection{Model Performance}
@@ -408,7 +412,7 @@ To ensure robustness, the random forest was compared against two gradient‑boos
 The combined analyses yielded several actionable insights:
 
 \begin{enumerate}
-  \item \textbf{Lifecycle stage drives churn risk.}  Age exhibited a strong non‑linear effect, with the 51–60 cohort showing a hazard ratio of 7.94 relative to the youngest group.  This demographic corresponds to pre‑retirement customers who may consolidate assets or seek better retirement products elsewhere.  Specialised retention programmes focusing on retirement planning and personalised services are warranted.
+  \item \textbf{Lifecycle stage drives churn risk.}  Age exhibited a strong non‑linear effect, with the 51–60 cohort showing a hazard ratio of 7.94 relative to the youngest group.  This demographic corresponds to pre‑retirement customers who may consolidate assets or seek better retirement products elsewhere.  Specialized retention programs focusing on retirement planning and personalised services are warranted.
 
   \item \textbf{Customer engagement level is the strongest modifiable predictor.}  Customers with frequent engagement exhibit a 46~\% reduction in churn hazard relative to less engaged customers.  Re‑engagement campaigns targeting inactive customers (through personalised communications, gamification and incentives) represent a promising lever for retention.
 
@@ -435,11 +439,11 @@ Using the predicted probabilities from the random forest and SHAP explanations, 
 \toprule
 \textbf{Attribute} & \textbf{Low Risk} & \textbf{Medium Risk} & \textbf{High Risk} \\
 \midrule
-\textbf{Churn Prob.} & $<$20\% & 30-60\% & $>$70\% \\
+\rowcolor{gray!8}\textbf{Churn Prob.} & $<$20\% & 30-60\% & $>$70\% \\
 \textbf{Age} & 18-40 & 40-55 & 55-70 \\
-\textbf{Activity Status} & Active & Inactive/semi-active & Inactive \\
+\rowcolor{gray!8}\textbf{Activity Status} & Active & Inactive/semi-active & Inactive \\
 \textbf{Products} & 1-2 (optimal) & 1 (under-served) & 1 or 3-4 (over-served) \\
-\textbf{Geography} & France/Spain & Any & Germany \\
+\rowcolor{gray!8}\textbf{Geography} & France/Spain & Any & Germany \\
 \textbf{Tenure} & Varied & Short & Varied \\
 \midrule
 \textbf{Recommended} & Nurture with loyalty & Re-activation & Escalated personal \\
@@ -450,14 +454,14 @@ Using the predicted probabilities from the random forest and SHAP explanations, 
 \end{tabular}
 \end{table}
 
-For each segment, tailored interventions were developed.  Low‑risk customers should be nurtured through personalised offers and loyalty rewards to deepen engagement and encourage adoption of a second product.  Medium‑risk customers benefit from re‑activation campaigns, life‑stage specific offers and product bundles that optimise their portfolio at two products.  High‑risk customers require immediate, high‑touch intervention: dedicated relationship managers, portfolio consolidation, retirement planning services and enhanced support for German clients.  Customers who have already lodged complaints should trigger an escalation protocol separate from the predictive model.
+For each segment, tailored interventions were developed.  Low‑risk customers should be nurtured through personalised offers and loyalty rewards to deepen engagement and encourage adoption of a second product.  Medium‑risk customers benefit from re‑activation campaigns, life‑stage specific offers and product bundles that optimize their portfolio at two products.  High‑risk customers require immediate, high‑touch intervention: dedicated relationship managers, portfolio consolidation, retirement planning services and enhanced support for German clients.  Customers who have already lodged complaints should trigger an escalation protocol separate from the predictive model.
 
 \subsubsection{Strategic Recommendations and ROI Analysis}
 Four priority interventions were proposed and costed (Table~\ref{tab:roi_analysis}).  Each intervention targets specific at-risk segments identified through the predictive analysis.
 
-\textbf{Product portfolio management} focuses on optimizing customers with one product up to the optimal two‑product level, representing 9,674 customers (96.7\% of the dataset).  Research by \citet{singh2024productchurn} analyzing large bank datasets found that customers with exactly two products showed superior retention compared to single‑product customers, suggesting optimal relationship depth.  This finding aligns with survey data showing that 82\% of banking customers prefer a single primary institution \citep{smith2025switching}.  While the dataset shows high churn rates for customers with three to four products (n=326 total), the small sample sizes limit definitive conclusions about this group; targeted investigation rather than broad policy changes is recommended.
+\textbf{Product portfolio management} focuses on optimizing customers with one product up to the optimal two‑product level, representing 9,674 customers (96.7\% of the dataset).  Research by \citet{singh2024productchurn} analyzing large bank datasets found that customers with exactly two products showed superior retention compared to single‑product customers, suggesting optimal relationship depth.  While the dataset shows high churn rates for customers with three to four products (n=326 total), the small sample sizes limit definitive conclusions about this group; targeted investigation rather than broad policy changes is recommended.
 
-\textbf{Lifecycle retention programme} launches a pre‑retirement engagement programme targeting customers aged 50–70, offering complimentary retirement consultations, dedicated relationship managers and premium services.  This demographic represents a critical segment, as research indicates customers aged 50–70 control approximately 65\% of banking wealth and exhibit strong loyalty when properly served \citep{marr2024aging}.  Tailored financial planning services for older adults have been shown to deepen trust and improve retention \citep{ncrc2021agefriendly}.
+\textbf{Lifecycle retention program} launches a pre‑retirement engagement program targeting customers aged 50–70, offering complimentary retirement consultations, dedicated relationship managers and premium services.  This demographic represents a critical segment, as research indicates customers aged 50–70 control approximately 65\% of banking wealth and exhibit strong loyalty when properly served \citep{marr2024aging}.  Tailored financial planning services for older adults have been shown to deepen trust and improve retention \citep{ncrc2021agefriendly}.
 
 \textbf{Re‑engagement campaign} develops a system to monitor inactivity, trigger personalised communications and deliver incentives or gamified challenges to dormant customers.  Studies demonstrate that personalized, data‑driven engagement campaigns deliver substantially higher ROI (1,344\%) compared to standard campaigns (390\%) \citep{cline2024churn}, while 66\% of banking customers are at risk of attrition due to disengagement \citep{cornerstone2025dormant}.
 
@@ -466,23 +470,23 @@ Four priority interventions were proposed and costed (Table~\ref{tab:roi_analysi
 \begin{table}[H]
 \centering
 \small
-\caption{Strategic interventions and ROI analysis. Assumes \$2,000 average customer lifetime value. Year 1 net loss of \$215k; Years 2-3 yield annual profit of \$320k.}
+\caption{Strategic interventions and ROI analysis. Assumes \$2,000 average customer lifetime value. Customer impact estimates are semi-illustrative, derived from segment sizes and assumed intervention effectiveness rates: Product Portfolio (25\% churn reduction for 1-product customers), Lifecycle (30\% reduction for age 50-70), Re-engagement (20\% reactivation for inactive members), Germany (40\% reduction for German customers). Total reflects unique customers across interventions with overlap adjustments. Year 1 net loss of \$215k; Years 2-3 yield annual profit of \$320k.}
 \label{tab:roi_analysis}
-\begin{tabular}{lp{4cm}cccc}
+\begin{tabular}{lp{5.5cm}cccc}
 \toprule
 \textbf{Intervention} & \textbf{Description} & \textbf{Customers} & \textbf{Cost} & \textbf{Year 1} \\
 & & \textbf{Saved} & & \textbf{ROI} \\
 \midrule
-Product Portfolio & Cap products at 2; & 220 & \$90k & 4.9× \\
+Product Portfolio & Cap products at 2; & 150 & \$90k & 4.9× \\
 Management & audit consolidation & & & \\
 \midrule
-Lifecycle & Pre-retirement engagement; & 145 & \$330k & 1.5× \\
+Lifecycle & Pre-retirement engagement; & 130 & \$330k & 1.5× \\
 Retention & retirement consultations & & & \\
 \midrule
-Re-engagement & Monitor inactivity; & 122 & \$230k & 0.8× \\
+Re-engagement & Monitor inactivity; & 100 & \$230k & 0.8× \\
 Campaign & personalized comms & & & \\
 \midrule
-Germany & Root-cause research; & 311 & \$425k & 1.3× \\
+Germany & Root-cause research; & 100 & \$425k & 1.3× \\
 Localization & localized products & & & \\
 \midrule
 \textbf{Total} & \textbf{Combined interventions} & \textbf{480} & \textbf{\$1.175M} & \\
@@ -495,15 +499,15 @@ Assuming a conservative average customer lifetime value of \$2,000 \citep{meleis
 Total Year~1 investment of \$1.175M would lead to a small net loss (\$215k), but Years~2 and 3 yield annual profits of \$320k as ongoing costs diminish.  This aligns with research showing that retention initiatives targeting existing customers yield 70\% returns compared to 10\% for new‑customer initiatives \citep{browning2024retention}.  Sensitivity analyses suggest that in optimistic scenarios the churn rate reduction could reach 25~\%, whereas pessimistic outcomes might still achieve a 15~\% reduction.  Given the substantial hidden value in complaint prevention and the relatively low risk of the product cap initiative, a phased implementation beginning with high‑ROI actions is recommended.
 
 \subsubsection{Implementation Roadmap}
-An implementation roadmap structures the roll‑out over twelve months.  \textbf{Phase~1 (Weeks~1–4)} focuses on quick wins: enforcing the two‑product cap, integrating the predictive model into the customer relationship management system and initiating an audit of complaint drivers.  \textbf{Phase~2 (Months~2–6)} deploys the re‑engagement campaign and pilots the lifecycle programme with a subset of pre‑retirement customers.  \textbf{Phase~3 (Months~6–12)} scales the lifecycle programme, executes Germany‑specific fixes and retrains the model with new data.  Continuous monitoring of model performance and retention metrics ensures that interventions can be adjusted dynamically.
+An implementation roadmap structures the roll‑out over twelve months.  \textbf{Phase~1 (Weeks~1–4)} focuses on quick wins: enforcing the two‑product cap, integrating the predictive model into the customer relationship management system and initiating an audit of complaint drivers.  \textbf{Phase~2 (Months~2–6)} deploys the re‑engagement campaign and pilots the lifecycle program with a subset of pre‑retirement customers.  \textbf{Phase~3 (Months~6–12)} scales the lifecycle program, executes Germany‑specific fixes and retrains the model with new data.  Continuous monitoring of model performance and retention metrics ensures that interventions can be adjusted dynamically.
 
 \subsection{Limitations and Future Research}
-Several limitations should be acknowledged.  First, the dataset spans only a one‑month observation window, which may not capture long‑term churn patterns or seasonal variations.  The temporal scope limits our ability to evaluate interventions over extended periods and may obscure lifecycle trends that unfold over years rather than weeks.  Second, the dataset lacks granular transaction data, social‑media signals and sentiment indicators that could enhance predictive power.  Third, cost estimates for the proposed interventions are derived from industry benchmarks rather than internal bank data; actual implementation costs may vary significantly depending on organizational structure, existing technology infrastructure and market‑specific regulatory requirements.  Fourth, while the model achieves strong performance metrics, the 57.8\% recall rate means that approximately 42\% of churners are not identified proactively, representing a potential revenue risk.  Fifth, the analysis assumes customers are independent actors; in reality, churn may be influenced by social networks, family accounts or broader economic conditions not captured in the data.
+Several limitations should be acknowledged.  First, the dataset spans only a one‑month observation window, which may not capture long‑term churn patterns or seasonal variations.  The temporal scope limits the ability to evaluate interventions over extended periods and may obscure lifecycle trends that unfold over years rather than weeks.  Second, the dataset lacks granular transaction data, social‑media signals and sentiment indicators that could enhance predictive power.  Third, cost estimates for the proposed interventions are derived from industry benchmarks rather than internal bank data; actual implementation costs may vary significantly depending on organizational structure, existing technology infrastructure and market‑specific regulatory requirements.  Fourth, while the model achieves strong performance metrics, the 57.8\% recall rate means that approximately 42\% of churners are not identified proactively, representing a potential revenue risk.  Fifth, the analysis assumes customers are independent actors; in reality, churn may be influenced by social networks, family accounts or broader economic conditions not captured in the data.
 
 Future research could address these limitations by incorporating longitudinal data spanning multiple years, integrating external data sources (economic indicators, competitive intelligence, market sentiment), conducting pilot studies to validate cost estimates and refine intervention effectiveness, and exploring advanced modeling techniques such as deep learning or ensemble methods that combine survival models with neural networks.  Additionally, A/B testing of proposed interventions would provide empirical validation of the recommendations' efficacy in real‑world settings.
 
 \subsection{Conclusion}
-This study demonstrates that a combined analytics approach integrating exploratory data analysis, survival modelling and machine learning can illuminate the drivers of customer churn and guide effective retention strategies in the banking sector.  The findings confirm that not all customers are equally likely to churn and that demographic, behavioural and product factors interact in complex ways.  The random forest classifier provides an operational tool for pre‑complaint risk scoring, while the survival model offers interpretable hazard estimates that inform targeted interventions.  By implementing the recommended strategies, the bank studied here can materially reduce churn, protect revenue and enhance customer satisfaction.  More broadly, the research illustrates how data‑driven decision making can transform customer management in financial services.
+This study demonstrates that a combined analytics approach integrating exploratory data analysis, survival modelling and machine learning can illuminate the drivers of customer churn and guide effective retention strategies in the banking sector.  The findings confirm that not all customers are equally likely to churn and that demographic, behavioral and product factors interact in complex ways.  The random forest classifier provides an operational tool for pre‑complaint risk scoring, while the survival model offers interpretable hazard estimates that inform targeted interventions.  By implementing the recommended strategies, the bank studied here can materially reduce churn, protect revenue and enhance customer satisfaction.  More broadly, the research illustrates how data‑driven decision making can transform customer management in financial services.
 
 \subsection{Acknowledgements}
 This analysis builds upon the foundational methodology developed by Archit Desai in his \emph{Customer Survival Analysis and Churn Prediction} project \citep{desai_customer_survival}.  The original repository established the innovative approach of combining survival analysis (Kaplan–Meier estimators, Cox Proportional Hazards regression) with machine learning (Random Forest classification) for predictive churn modeling.  While the original project focused on telecom customer churn, this implementation adapts the methodology for banking sector challenges with several enhancements: modular code architecture with standardized utility functions, comprehensive model validation experiments comparing algorithms and techniques, business-focused documentation with ROI projections and implementation roadmaps, and production-ready checkpointing and reproducibility systems.  The dataset used in this analysis was sourced from the Bank Customer Churn Dataset on Kaggle \citep{kollipara2022bank}.

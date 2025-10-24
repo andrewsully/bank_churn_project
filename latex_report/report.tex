@@ -30,7 +30,7 @@
 }
 
 % Title page information
-\title{Customer Churn Prediction and Survival Analysis in the Banking Sector}
+\title{Customer Churn in Banking: An Integrated Approach Combining Survival Analysis and Machine Learning}
 \author{Andrew Sullivan}
 \date{October~23,~2025}
 
@@ -40,7 +40,7 @@
 \begin{titlepage}
   \centering
   \vspace*{2cm}
-  \Huge\textbf{Customer Churn Prediction and Survival Analysis\\in the Banking Sector}
+  \Huge\textbf{Customer Churn in Banking:}\\An Integrated Approach Combining\\Survival Analysis and Machine Learning
   \vspace{1.5cm}
 
   \large
@@ -63,9 +63,9 @@ Customer retention has emerged as a strategic priority for banks amid intensifyi
 \pagenumbering{arabic}
 
 \section{Introduction}
-Customer churn, the process by which customers close accounts or cease doing business with a firm, is a critical concern for banks.  On average, acquiring a new customer can cost five to seven times more than retaining an existing one \citep{businessbuilders2024cost}, and even modest improvements in retention can yield disproportionate profit increases \citep{kumar2022customerretention}.  For many financial institutions, high churn rates translate into substantial losses in lifetime value.  Effective churn management therefore requires not only understanding who leaves and when, but also why they leave and how the bank can intervene.
+Customer churn, the process by which customers close accounts or cease doing business with a firm, is a critical concern for banks. On average, acquiring a new customer can cost five to seven times more than retaining an existing one \citep{businessbuilders2024cost}, and even modest improvements in retention can yield disproportionate profit increases \citep{kumar2022customerretention}. For many financial institutions, high churn rates translate into substantial losses in lifetime value. Effective churn management therefore requires not only understanding who leaves and when, but also why they leave and how the bank can intervene.
 
-Using a rich dataset of ten thousand customers made publicly available by \citet{kollipara2022bank}, this study investigates demographic, behavioral and financial attributes to determine how they contribute to attrition.  Survival analysis and machine learning techniques are employed to estimate individual churn probabilities and design targeted retention programs.  The analysis identifies predictive factors through exploratory analysis, quantifies time‑to‑churn patterns using survival models, builds an accurate predictive classifier for proactive risk scoring, validates model performance against alternative algorithms, and translates statistical findings into actionable business recommendations with quantified ROI.  The methods and insights presented here demonstrate an integrated approach to analytics‑driven customer retention applicable to similar banking contexts.
+Using a rich dataset of ten thousand customers made publicly available by \citet{kollipara2022bank}, this study investigates demographic, behavioral and financial attributes to determine how they contribute to attrition. The analysis employs survival analysis and machine learning techniques to estimate individual churn probabilities and design targeted retention programs. Specifically, this study conducts exploratory data analysis to identify predictive factors, quantifies time‑to‑churn patterns using Kaplan–Meier estimators and Cox proportional hazards models, builds a random forest classifier for proactive risk scoring, validates model performance against alternative algorithms, and translates statistical findings into actionable business recommendations with quantified ROI. The methods and insights presented here demonstrate an integrated approach to analytics‑driven customer retention applicable to similar banking contexts.
 
 \subsection{Literature Review}
 Customer retention has emerged as a fundamental business imperative across service industries, driven by the well-established principle that retaining existing customers costs significantly less than acquiring new ones \citep{businessbuilders2024cost}. In banking, this dynamic is particularly pronounced, with customer lifetime values ranging from \$2,000 to \$4,000 for typical retail banking relationships \citep{meleis2010clv}.
@@ -74,40 +74,63 @@ Early approaches to churn management relied on customer relationship management 
 
 However, traditional classification approaches, while effective at answering \emph{who} will churn, provide limited insight into \emph{when} churn occurs or how temporal factors contribute to attrition risk. Survival analysis methods, adapted from biostatistics and telecommunications churn studies \citep{desai_customer_survival}, offer a complementary framework for modeling time-to-event outcomes. Model interpretability has also emerged as a critical requirement for operational deployment, with recent work demonstrating the utility of SHAP (Shapley Additive Explanations) frameworks for explaining black-box predictions in banking contexts \citep{peng2023interpretability}. The translation of predictive insights into actionable business strategy also remains a critical gap in academic churn research \citep{brito2024framework}.
 
-This study bridges these gaps by combining survival analysis methodology with comparative ML evaluation and strategic business planning. The analysis extends the findings of \citet{singh2024productchurn} through several methodological contributions: (1) incorporation of Kaplan-Meier survival curves and Cox modeling to quantify temporal churn patterns; (2) systematic comparison of SMOTE oversampling versus class-weight balancing strategies; (3) application of SHAP values and partial dependence plots for granular model interpretability; and (4) translation of statistical findings into quantified ROI projections and phased implementation strategies.
+This study bridges these gaps by combining survival analysis methodology with comparative ML evaluation and strategic business planning. The analysis extends the findings of \citet{singh2024productchurn} through several methodological contributions: (1) incorporation of Kaplan–Meier survival curves and Cox proportional hazards modeling to quantify temporal churn patterns; (2) systematic comparison of SMOTE oversampling versus class-weight balancing strategies; (3) application of SHAP values and partial dependence plots for granular model interpretability; and (4) translation of statistical findings into quantified ROI projections and phased implementation strategies.
 
 \section{Methods}
+This section describes the data sources, preprocessing procedures, statistical methods, and model development approaches employed in the analysis. The methodology encompasses three main components: exploratory data analysis to identify patterns and guide feature selection, survival analysis to quantify temporal churn patterns, and predictive modeling to develop actionable risk scoring tools.
+
 \subsection{Dataset and Pre‑Processing}
 \subsubsection{Data Source and Structure}
 The analysis uses the \emph{Bank Customer Churn} dataset compiled by \citet{kollipara2022bank}.  The dataset comprises 10,000 anonymised records of retail banking customers.  Each record includes demographic variables (e.g.\ gender, geography, age), behavioral indicators (active membership status, tenure), product usage metrics (number of products, credit card ownership), financial variables (balance, estimated salary, credit score) and experiential measures (satisfaction score, complaint status, card type and loyalty points).  In addition to the feature columns, the dataset includes a binary target variable indicating whether the customer exited the bank.  The data card provided by the dataset author notes that identifier columns such as RowNumber and CustomerId have no predictive value and should be dropped.
 
 \subsubsection{Cleaning and Feature Engineering}
-Prior to analysis, records with missing or duplicate values were removed.  Exploratory inspection of the variables revealed no missing values and thus no imputation was required.  Identifier fields were discarded, leaving fifteen explanatory variables.  An age\_group feature was engineered by discretising the Age variable into six categories (18–30, 31–40, 41–50, 51–60, 61–70, 70+) to capture non‑linear lifecycle effects while preserving interpretability.  One‑hot encoding was applied to categorical variables (gender and geography), and the complaint indicator was intentionally excluded from predictive models because it is a lagging indicator of churn: nearly every customer who filed a complaint ultimately left the bank.  Continuous variables were standardised to facilitate model training.
+Records with missing or duplicate values were removed. Identifier fields (RowNumber, CustomerId) were discarded. An age\_group feature was engineered by discretising the Age variable into six categories (18–30, 31–40, 41–50, 51–60, 61–70, 70+) to capture non‑linear lifecycle effects while preserving interpretability. One‑hot encoding was applied to categorical variables (gender and geography). The complaint indicator was intentionally excluded from predictive models as a lagging indicator of churn. Continuous variables were standardized using Z-score normalization to facilitate model training.
 
 \subsubsection{Feature Selection and Rationale}
-Linear correlation analysis with churn revealed distinct tiers of predictive strength (Figure~\ref{fig:feature_selection}).  Age, activity status and balance showed moderate to strong correlations (r=0.285, -0.156 and 0.119 respectively) and were retained as core predictors, along with geography and number of products.  In contrast, satisfaction\_score, point\_earned, estimated\_salary, credit\_score, tenure and card\_type exhibited minimal linear relationships (|r| $<$ 0.10) and were excluded from modeling.  This selective approach balances predictive power with interpretability, emphasizing modifiable factors (number of products, activity status) and strong demographic predictors (age, geography) that directly inform intervention strategies.
+Linear correlation analysis with churn was used to identify predictive features. Features with moderate to strong correlations (|r| $\geq$ 0.10) were retained as core predictors, while those with minimal linear relationships (|r| $<$ 0.10) were excluded from modeling. The complaint indicator was intentionally excluded because it represents a lagging indicator of churn that would create a methodological degenerate case \citep{kumar2022customerretention}. This selective approach balances predictive power with interpretability, emphasizing modifiable factors (number of products, activity status) and strong demographic predictors (age, geography) that directly inform intervention strategies. Features with weak linear correlation but anticipated non-linear effects were retained for tree-based algorithms capable of capturing complex patterns.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.7\textwidth]{img/feature_selection_comparison.png}
-\caption{Feature selection rationale comparing strong (|r| $\geq$ 0.10) and weak (|r| $<$ 0.10) predictors. Strong predictors (red) were retained for modeling; weak predictors (gray) were excluded. Complaint status shows near‑perfect correlation (r=0.996) but is excluded as a lagging indicator.}
-\label{fig:feature_selection}
-\end{figure}
 
-While including complaint status would yield near‑perfect accuracy (99\%+), it represents a methodological degenerate case: the model achieves inflated performance by relying on a single dominant feature that essentially solves the classification problem before meaningful pattern recognition occurs.  Following best practices in operational ML \citep{kumar2022customerretention}, complaint status was intentionally excluded to enable genuine feature discovery and actionable business intelligence.  This trade-off sacrifices headline accuracy metrics (85.9\% vs.\ potential 99\%+) to uncover meaningful antecedent patterns that drive real intervention strategies.  Models achieving high accuracy through lagging indicators identify customers who have already expressed dissatisfaction through formal channels, exactly when retention is least likely to succeed.
+\subsection{Survival Analysis}
+Survival analysis models the time until an event occurs and is well suited for churn studies where the timing of attrition matters. The fundamental quantity is the survival function \(S(t) = \Pr(T > t)\), which represents the probability of surviving at least to time \(t\). The hazard function \(h(t)\) quantifies the instantaneous risk of experiencing the event at time \(t\), given survival until \(t\).
 
-Kernel density estimates for excluded continuous features (Figure~\ref{fig:kde_weak}) confirm their lack of discriminatory power through near‑complete distributional overlap between churned and retained customers.  Similar minimal effects were observed for categorical excluded features: card type exhibited only a 2.5 percentage point difference in churn rates across all four tiers (19.3\%–21.8\%).  Notably, the number of products showed weak linear correlation (r=-0.048) but was retained based on its demonstrated non‑linear U‑shaped effect.  This feature selection framework maintains predictive power through tree‑based algorithms capable of capturing non‑linear relationships while prioritizing interpretability.
+\subsubsection{Kaplan–Meier Estimator}
+Kaplan–Meier (K–M) estimators, first described by \citet{dudley2016kaplan}, are non‑parametric methods that estimate the survival function based solely on observed event times and censoring. K–M curves were computed for customer segments stratified by age group, number of products, activity status, geography, gender, and balance group. Log-rank tests were performed to assess statistical significance of differences between groups, testing the null hypothesis that survival distributions are identical across strata.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{img/poc_kde_plots.png}
-\caption{Kernel density estimates for excluded continuous features. Near‑complete overlap between churned (red) and retained (green) distributions confirms these features lack discriminatory power, visually validating their weak correlation values.}
-\label{fig:kde_weak}
-\end{figure}
+\subsubsection{Cox Proportional Hazards Model}
+The Cox proportional‑hazards model is a multivariable regression that relates the hazard of the event to multiple covariates simultaneously \citep{sthda_cox}. The hazard function in the Cox model is specified as
+\[ h(t) = h_0(t) \exp(\beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_p x_p), \]
+where \(h_0(t)\) is the baseline hazard and the coefficients \(\beta_i\) quantify the effect of covariate \(x_i\) on the hazard. Hazard ratios (\(\exp(\beta_i)\)) greater than one indicate increased risk, while ratios below one signify protective effects.
 
+A Cox model was fitted excluding the complaint variable to avoid its dominance. Covariates included gender, tenure, balance, number of products, activity status, geography, and age group dummy variables. Model fit was assessed using the concordance index (C-index), which measures the proportion of comparable pairs where the predicted outcomes are correctly ordered.
+
+\subsection{Predictive Modeling}
+A random forest classifier was trained on the curated feature set to identify at‑risk customers before a complaint is lodged. Random forests are ensemble learning techniques that combine the output of many decision trees built on bootstrap samples of the data \citep{geeksforgeeks_randomforest}. Each tree considers a random subset of features at each split and contributes a vote to the final prediction. Formally, for a random forest with \(B\) trees, the ensemble prediction is
+\[ \hat{f}_{\text{RF}}(\mathbf{x}) = \frac{1}{B} \sum_{b=1}^{B} \hat{f}_b(\mathbf{x}), \]
+where \(\hat{f}_b(\mathbf{x})\) is the prediction from the \(b\)-th tree trained on a bootstrap sample with random feature selection at each split. For classification, the final prediction is the majority vote across all trees.
+
+Data were split into training (80\%) and test (20\%) sets using stratified sampling to preserve class distribution. A four‑stage grid search was performed to tune hyperparameters including the number of trees, maximum depth, splitting criteria, minimum samples per split, and class weights. Class imbalance was addressed by weighting the minority class twice as heavily as the majority class.
+
+\subsubsection{Random Forest Implementation}
+Random forests were implemented using scikit-learn's RandomForestClassifier. The algorithm randomly samples both observations (with replacement) and features (without replacement) at each split, creating decorrelated trees that reduce overfitting through ensemble averaging.
+
+\subsubsection{Model Evaluation Metrics}
+Model performance was assessed using multiple metrics. Accuracy quantifies the overall proportion of correct predictions but is sensitive to class imbalance. Precision measures the fraction of predicted churners that actually churn. Recall measures the fraction of actual churners correctly identified. F1-score provides a harmonic mean balancing precision and recall.
+
+Threshold-agnostic discrimination was evaluated using receiver operating characteristic (ROC) curves, computing the area under the curve (ROC-AUC). The ROC-AUC quantifies the probability that the classifier ranks a randomly chosen positive instance higher than a randomly chosen negative instance. Precision-recall curves and PR-AUC were also computed, providing more informative assessment under class imbalance.
+
+Feature importance was assessed using three complementary approaches: (1) built-in impurity-based importance from the trained model, (2) permutation importance measuring performance degradation when features are randomly shuffled, and (3) SHAP (Shapley Additive Explanations) values quantifying marginal feature contributions to individual predictions. Partial dependence plots were generated to visualize the marginal effect of individual features on predicted probabilities.
+
+\subsubsection{Model Comparison and Validation}
+The Random Forest classifier was compared against two gradient‑boosting alternatives: XGBoost \citep{Chen_2016} and LightGBM \citep{ke2017lightgbm}. Both are ensemble methods that sequentially add weak learners to correct prior errors, differing primarily in their splitting strategies: XGBoost uses a level‑wise (breadth‑first) tree growth approach with regularization, while LightGBM employs a leaf‑wise (depth‑first) growth strategy optimized for computational efficiency. All models were trained on identical data splits and tuned with analogous hyperparameter grid searches.
+
+Additionally, experiments evaluated synthetic minority oversampling (SMOTE) versus class-weight balancing strategies, and tested whether engineered features (interaction terms and polynomial expansions) improved performance beyond tree-based algorithms' inherent capacity to capture non-linear interactions.
+
+\section{Results}
 \subsection{Exploratory Data Analysis}
-\subsubsection{Churn Rate and Segment Distributions}
-The baseline churn rate in the dataset is 20.4~\%, corresponding to 2,038 customers exiting during the observation window and 7,962 remaining.  Figure~\ref{fig:churn_rate} illustrates the overall churn distribution.  Preliminary univariate analyses identified several striking patterns.  The most dominant factor was complaint status: 99.5~\% of customers who lodged a complaint subsequently churned, compared to only 0.05~\% of non‑complainers.  Because complaint status is effectively a point of no return, it was analysed separately from the main predictive model.
+Exploratory data analysis was conducted to characterize the dataset, identify baseline churn patterns, and guide feature selection decisions. This initial investigation revealed several striking patterns that informed subsequent survival analysis and predictive modeling approaches.
+
+\subsubsection{Baseline Churn Rate and Descriptive Statistics}
+The baseline churn rate in the dataset is 20.4~\%, corresponding to 2,038 customers exiting during the observation window and 7,962 remaining (Figure~\ref{fig:churn_rate}). The most dominant factor was complaint status: 99.5~\% of customers who lodged a complaint subsequently churned, compared to only 0.05~\% of non‑complainers. Because complaint status is effectively a point of no return, it was analysed separately from the main predictive model.
 
 \begin{figure}[H]
 \centering
@@ -116,7 +139,8 @@ The baseline churn rate in the dataset is 20.4~\%, corresponding to 2,038 custom
 \label{fig:churn_rate}
 \end{figure}
 
-A "Goldilocks" effect was observed with respect to the number of products owned: referring to the fairy tale where optimal conditions are found between extremes, customers with exactly two products exhibited the lowest churn rate (7.6~\%, n=4,590), whereas those with three or four products showed higher attrition rates (82.7~\% and 100~\% respectively), as shown in Figure~\ref{fig:products}.  However, the interpretation of extreme churn rates for three and four products must be tempered by small sample sizes (n=266 and n=60 respectively); these figures may reflect sampling variability or unobserved confounding factors rather than a causal effect of product overload.  Age displayed a lifecycle pattern, with churn rates rising sharply for pre‑retirement customers (51–60 years) and declining for very young or very old clients (Figure~\ref{fig:age}).  Activity status was strongly predictive: inactive members were 1.88 times more likely to churn than active members (Figure~\ref{fig:active}).  Finally, geography revealed a pronounced disparity: German customers had twice the churn rate of their French and Spanish counterparts, suggesting potential market‑specific issues (Figure~\ref{fig:geography}).
+\subsubsection{Segment-Level Churn Patterns}
+A "Goldilocks" effect was observed with respect to the number of products owned: customers with exactly two products exhibited the lowest churn rate (7.6~\%, n=4,590), whereas those with three or four products showed higher attrition rates (82.7~\% and 100~\% respectively, n=266 and n=60 respectively), as shown in Figure~\ref{fig:products}. Age displayed a lifecycle pattern, with churn rates rising sharply for pre‑retirement customers (51–60 years) and declining for very young or very old clients (Figure~\ref{fig:age}). Activity status was strongly predictive: inactive members were 1.88 times more likely to churn than active members (Figure~\ref{fig:active}). Geography revealed a pronounced disparity: German customers had twice the churn rate of their French and Spanish counterparts (Figure~\ref{fig:geography}).
 
 \begin{figure}[H]
 \centering
@@ -146,8 +170,28 @@ A "Goldilocks" effect was observed with respect to the number of products owned:
 \label{fig:geography}
 \end{figure}
 
-\subsubsection{Correlation and Interaction Analysis}
-Pearson correlation and chi‑squared tests were used to quantify associations between features and churn.  Complaint status exhibited an almost perfect correlation with churn (\(r=0.996\)).  Age, number of products and activity status had moderate correlations, while balance and tenure showed weaker associations.  Correlation analysis (Figure~\ref{fig:correlation}) revealed non‑linear patterns, particularly for the number of products (a U‑shaped relationship) and complex associations between age and activity status.  To capture these patterns, later modelling stages employed algorithms capable of handling non‑linearities.
+\subsubsection{Feature Selection Analysis}
+Linear correlation analysis with churn revealed distinct tiers of predictive strength (Figure~\ref{fig:feature_selection}). Age, activity status and balance showed moderate to strong correlations (r=0.285, -0.156 and 0.119 respectively) and were retained as core predictors, along with geography and number of products. In contrast, satisfaction\_score, point\_earned, estimated\_salary, credit\_score, tenure and card\_type exhibited minimal linear relationships (|r| $<$ 0.10) and were excluded from modeling.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{img/feature_selection_comparison.png}
+\caption{Feature selection rationale comparing strong (|r| $\geq$ 0.10) and weak (|r| $<$ 0.10) predictors. Strong predictors (red) were retained for modeling; weak predictors (gray) were excluded. Complaint status shows near‑perfect correlation (r=0.996) but is excluded as a lagging indicator.}
+\label{fig:feature_selection}
+\end{figure}
+
+While including complaint status would yield near‑perfect accuracy (99\%+), it represents a methodological degenerate case: the model achieves inflated performance by relying on a single dominant feature that essentially solves the classification problem before meaningful pattern recognition occurs. Following best practices in operational ML \citep{kumar2022customerretention}, complaint status was intentionally excluded to enable genuine feature discovery and actionable business intelligence. This trade-off sacrifices headline accuracy metrics (85.9\% vs.\ potential 99\%+) to uncover meaningful antecedent patterns that drive real intervention strategies. Models achieving high accuracy through lagging indicators identify customers who have already expressed dissatisfaction through formal channels, exactly when retention is least likely to succeed.
+
+Kernel density estimates for excluded continuous features (Figure~\ref{fig:kde_weak}) confirm their lack of discriminatory power through near‑complete distributional overlap between churned and retained customers. Similar minimal effects were observed for categorical excluded features: card type exhibited only a 2.5 percentage point difference in churn rates across all four tiers (19.3\%–21.8\%). Notably, the number of products showed weak linear correlation (r=-0.048) but was retained based on its demonstrated non‑linear U‑shaped effect. This feature selection framework maintains predictive power through tree‑based algorithms capable of capturing non‑linear relationships while prioritizing interpretability.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{img/poc_kde_plots.png}
+\caption{Kernel density estimates for excluded continuous features. Near‑complete overlap between churned (red) and retained (green) distributions confirms these features lack discriminatory power, visually validating their weak correlation values.}
+\label{fig:kde_weak}
+\end{figure}
+
+Pearson correlation analysis (Figure~\ref{fig:correlation}) revealed non‑linear patterns, particularly for the number of products (a U‑shaped relationship) and complex associations between age and activity status.
 
 \begin{figure}[H]
 \centering
@@ -156,14 +200,12 @@ Pearson correlation and chi‑squared tests were used to quantify associations b
 \label{fig:correlation}
 \end{figure}
 
-\subsection{Survival Analysis}
-Survival analysis models the time until an event occurs and is well suited for churn studies where the timing of attrition matters.  The fundamental quantity is the survival function \(S(t) = \Pr(T > t)\), which represents the probability of surviving at least to time \(t\).  The hazard function \(h(t)\) quantifies the instantaneous risk of experiencing the event at time \(t\), given survival until \(t\).
+\subsection{Survival Analysis Results}
+Survival analysis was conducted to quantify temporal churn patterns and identify risk factors associated with customer attrition over time. Two complementary approaches were employed: non-parametric Kaplan–Meier estimators for univariate analysis and semiparametric Cox proportional hazards regression for multivariate risk assessment.
 
-Two complementary techniques were employed: Kaplan–Meier estimators and the Cox proportional‑hazards model.  The Kaplan–Meier (K–M) estimator, first described by \citet{dudley2016kaplan}, is a non‑parametric method that estimates the survival function based solely on observed event times and censoring.  It is univariate and describes survival according to a single factor.  In contrast, the Cox model is a multivariable regression that relates the hazard of the event to multiple covariates simultaneously.  As \citet{sthda_cox} note, the Cox model accommodates both categorical and quantitative predictors and extends K–M methods by allowing several risk factors to be assessed together.  The hazard function in the Cox model is specified as
-\[ h(t) = h_0(t) \exp(\beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_p x_p), \]
-where \(h_0(t)\) is the baseline hazard and the coefficients \(\beta_i\) quantify the effect of covariate \(x_i\) on the hazard.  Hazard ratios (\(\exp(\beta_i)\)) greater than one indicate increased risk, while ratios below one signify protective effects.
+\subsubsection{Kaplan–Meier Survival Curves}
+Kaplan–Meier curves were computed for various customer segments (Figure~\ref{fig:survival_all}). The overall survival curve (Figure~\ref{fig:survival_overall}) indicated that median customer lifetime (time until exit) exceeded the 10‑year observation window for the majority of customers. Survival curves by number of products (Figure~\ref{fig:survival_products}) confirmed the U‑shaped pattern; customers with two products had the highest survival, while those with three or four products experienced steep declines. Age group curves (Figure~\ref{fig:survival_age}) revealed that pre‑retirement customers (51–60) had the steepest decline, consistent with the lifecycle hypothesis. Activity status curves (Figure~\ref{fig:survival_active}) showed that active members maintained higher survival probabilities over time.
 
-\subsubsection{Kaplan–Meier Results}
 \begin{figure}[H]
 \centering
 \begin{subfigure}[b]{0.48\textwidth}
@@ -197,7 +239,7 @@ where \(h_0(t)\) is the baseline hazard and the coefficients \(\beta_i\) quantif
 \label{fig:survival_all}
 \end{figure}
 
-Kaplan–Meier curves were computed for various customer segments.  The overall survival curve (Figure~\ref{fig:survival_overall}) indicated that median customer lifetime (time until exit) exceeded the 10‑year observation window for the majority of customers.  When stratified by complaint status, the curves diverged catastrophically: complainers' survival probability dropped to nearly zero almost immediately after the complaint, whereas non‑complainers retained high survival throughout the period.  Survival curves by number of products (Figure~\ref{fig:survival_products}) confirmed the U‑shaped pattern; customers with two products had the highest survival, while those with three or four products experienced steep declines.  Age group curves (Figure~\ref{fig:survival_age}) revealed that pre‑retirement customers (51–60) had the steepest decline, consistent with the lifecycle hypothesis.  Activity status curves (Figure~\ref{fig:survival_active}) showed that active members maintained higher survival probabilities over time.  Log‑rank tests confirmed that these differences were statistically significant. Table~\ref{tab:logrank_results} summarizes the complete log‑rank test results for all customer segment comparisons, confirming that all features exhibited highly significant differences in survival distributions (p $<$ 0.001).
+Log‑rank tests confirmed that these differences were statistically significant. Table~\ref{tab:logrank_results} summarizes the complete log‑rank test results for all customer segment comparisons, confirming that all features exhibited highly significant differences in survival distributions (p $<$ 0.001).
 
 \begin{table}[H]
 \centering
@@ -218,7 +260,7 @@ Balance Group & 154.37 & $<$ 0.001 \\
 \end{tabular}
 \end{table}
 
-The cumulative hazard function \(H(t) = -\ln(S(t))\) provides a complementary perspective to survival curves by quantifying the accumulated risk of churn over time.  While survival curves show the probability of retention, cumulative hazard directly measures the compounding risk of exit.  The cumulative hazard plot (Figure~\ref{fig:cumulative_hazard}) illustrates that churn risk accumulates gradually in the early years but accelerates markedly after approximately 7–8 years of tenure, indicating a critical intervention window.  This pattern suggests that long‑tenured customers who have accumulated substantial hazard may require intensified retention efforts, even if their current survival probability remains relatively high.
+The cumulative hazard function \(H(t) = -\ln(S(t))\) provides a complementary perspective to survival curves by quantifying the accumulated risk of churn over time (Figure~\ref{fig:cumulative_hazard}). Churn risk accumulates gradually in the early years but accelerates markedly after approximately 7–8 years of tenure, indicating a critical intervention window.
 
 \begin{figure}[H]
 \centering
@@ -227,8 +269,8 @@ The cumulative hazard function \(H(t) = -\ln(S(t))\) provides a complementary pe
 \label{fig:cumulative_hazard}
 \end{figure}
 
-\subsubsection{Cox Model Results}
-A Cox proportional‑hazards model was fitted excluding the complaint variable (to avoid its dominance).  Covariates included gender, tenure, balance, number of products, activity status, geography and age group dummies.  The model achieved a concordance index (C‑index) of 0.74, indicating good discriminative power.  Hazard ratios quantified the relative risk associated with each feature (Table~\ref{tab:cox_results}).  Notably, the age 51–60 group had a hazard ratio of 7.94, meaning their risk of churn was nearly eight times that of the baseline 18–30 group.  Being an active member reduced the hazard by 46~\% (hazard ratio \(0.54\)), while German nationality increased the hazard by 60~\% relative to France.  The number of products exhibited a linear hazard ratio close to one per additional product, but this masked the underlying U‑shape seen in the K–M curves.
+\subsubsection{Cox Proportional Hazards Model Results}
+The Cox model achieved a concordance index (C‑index) of 0.74, indicating good discriminative power. Hazard ratios quantified the relative risk associated with each feature (Table~\ref{tab:cox_results}). The age 51–60 group had a hazard ratio of 7.94, meaning their risk of churn was nearly eight times that of the baseline 18–30 group. Being an active member reduced the hazard by 46~\% (hazard ratio \(0.54\)), while German nationality increased the hazard by 60~\% relative to France. The number of products exhibited a linear hazard ratio close to one per additional product (HR=1.02), but this masked the underlying U‑shape seen in the K–M curves.
 
 \begin{table}[H]
 \centering
@@ -265,20 +307,10 @@ A Cox proportional‑hazards model was fitted excluding the complaint variable (
 \label{fig:cox_coefficients}
 \end{figure}
 
-\subsection{Predictive Modelling}
-\subsubsection{Random Forest Classifier}
-To identify at‑risk customers before a complaint is lodged, a random forest classifier was trained on the curated feature set.  Random forests are ensemble learning techniques that combine the output of many decision trees built on bootstrap samples of the data.  Each tree considers a random subset of features at each split and contributes a vote to the final prediction.  This majority‑voting scheme improves accuracy and reduces overfitting \citep{geeksforgeeks_randomforest}.  Formally, for a random forest with \(B\) trees, the ensemble prediction is
-\[ \hat{f}_{\text{RF}}(\mathbf{x}) = \frac{1}{B} \sum_{b=1}^{B} \hat{f}_b(\mathbf{x}), \]
-where \(\hat{f}_b(\mathbf{x})\) is the prediction from the \(b\)-th tree trained on a bootstrap sample with random feature selection at each split.  For classification, the final prediction is the majority vote across all trees.
+\subsection{Predictive Model Performance}
+A random forest classifier was developed to identify at-risk customers before explicit signals of dissatisfaction emerge. The model provides probabilistic risk scores that enable proactive intervention, complementing the temporal insights from survival analysis with actionable predictive intelligence.
 
-An extensive four‑stage grid search was performed to tune hyperparameters such as the number of trees, maximum depth, splitting criteria, minimum samples per split and class weights.  Class imbalance (20.4~\% churn) was addressed by weighting the minority class twice as heavily as the majority class.  The optimal configuration consisted of 900 trees, maximum depth of 11, Gini impurity criterion, no feature subsetting (max\_features=None), minimum split size of four samples and class weight ratio \(\{0:1,1:2\}\).
-
-\subsubsection{Model Comparison}
-To ensure robustness, the Random Forest classifier was compared against two gradient‑boosting alternatives: XGBoost \citep{Chen_2016} and LightGBM \citep{ke2017lightgbm}.  Both are ensemble methods that sequentially add weak learners to correct prior errors, differing primarily in their splitting strategies: XGBoost uses a level‑wise (breadth‑first) tree growth approach with regularization, while LightGBM employs a leaf‑wise (depth‑first) growth strategy optimized for computational efficiency.  All models were trained on identical data splits and tuned with analogous hyperparameter grid searches.  Performance comparisons are presented in Section 4.1.
-
-\section{Results}
-\subsection{Model Performance}
-The Random Forest model achieved 85.9~\% accuracy on the 2,000-sample test set, representing a 6.3 percentage point improvement over the majority-class baseline (79.6~\%) and demonstrating successful discrimination of churn risk. Class-specific performance metrics (Table~\ref{tab:model_performance}) showed precision of 68.0~\%, recall of 57.8~\% and F1‑score of 62.5~\%, with the most pronounced improvement over the untuned baseline being recall (+21~percentage points).
+The four-stage grid search identified an optimal Random Forest configuration consisting of 900 trees, maximum depth of 11, Gini impurity criterion, no feature subsetting (max\_features=None), minimum split size of four samples, and class weight ratio \(\{0:1,1:2\}\). The model achieved 85.9~\% accuracy on the 2,000-sample test set, representing a 6.3 percentage point improvement over the majority-class baseline (79.6~\%) and demonstrating successful discrimination of churn risk. Class-specific performance metrics (Table~\ref{tab:model_performance}) showed precision of 68.0~\%, recall of 57.8~\% and F1‑score of 62.5~\%, with the most pronounced improvement over the untuned baseline being recall (+21~percentage points).
 
 \begin{table}[H]
 \centering
@@ -383,7 +415,7 @@ NumOfProducts & 1.00 & +0.020 & Increases \\
 \end{tabular}
 \end{table}
 
-\subsection{Model Validation}
+\subsection{Model Validation and Robustness Checks}
 To ensure robustness, the random forest was compared against two gradient‑boosting alternatives: XGBoost and LightGBM (Figure~\ref{fig:model_comparison}).  All models were trained on identical splits and tuned with analogous hyperparameter searches.  Random forests slightly outperformed the alternatives in F1‑score (62.5~\% vs.\ 60.5–61.0~\%) and demonstrated more stable generalisation across folds.  A comprehensive metrics comparison (Figure~\ref{fig:metrics_comparison}) confirmed Random Forest's superiority.  Experiments evaluating synthetic minority oversampling (SMOTE) versus class weighting (Figure~\ref{fig:smote_roc}) revealed that SMOTE increased recall at the expense of a substantial rise in false positives; class weights offered a more balanced trade‑off.  Additional engineered features (interaction terms and polynomial expansions) did not improve performance, underscoring that tree‑based methods inherently capture non‑linear interactions.
 
 \begin{figure}[H]
@@ -409,26 +441,27 @@ To ensure robustness, the random forest was compared against two gradient‑boos
 
 \section{Discussion}
 \subsection{Key Findings}
-The combined analyses yielded several actionable insights:
+The combined analyses integrating survival analysis and machine learning yielded several actionable insights:
 
 \begin{enumerate}
-  \item \textbf{Lifecycle stage drives churn risk.}  Age exhibited a strong non‑linear effect, with the 51–60 cohort showing a hazard ratio of 7.94 relative to the youngest group.  This demographic corresponds to pre‑retirement customers who may consolidate assets or seek better retirement products elsewhere.  Specialized retention programs focusing on retirement planning and personalised services are warranted.
+  \item \textbf{Lifecycle stage drives churn risk.} The Cox model identified age as exhibiting the strongest non‑linear effect, with the 51–60 cohort showing a hazard ratio of 7.94 relative to the youngest group. This demographic corresponds to pre‑retirement customers who may consolidate assets or seek better retirement products elsewhere.
 
-  \item \textbf{Customer engagement level is the strongest modifiable predictor.}  Customers with frequent engagement exhibit a 46~\% reduction in churn hazard relative to less engaged customers.  Re‑engagement campaigns targeting inactive customers (through personalised communications, gamification and incentives) represent a promising lever for retention.
+  \item \textbf{Customer engagement is the strongest modifiable predictor.} Active membership reduces churn hazard by 46\% (HR=0.54) relative to inactive members. This finding is particularly actionable because engagement can be influenced through targeted re‑activation campaigns.
 
-  \item \textbf{Geography matters.}  German customers exhibited twice the churn rate of French and Spanish customers and a hazard ratio of 1.60.  Market‑specific issues such as competition, regulation or service quality likely underlie this disparity and require targeted investigation and localisation strategies.
+  \item \textbf{Geography exhibits pronounced disparities.} German customers exhibited twice the churn rate of French and Spanish customers and a hazard ratio of 1.60. Market‑specific issues such as competition, regulation or service quality likely underlie this disparity.
 
-  \item \textbf{Product portfolio has a Goldilocks zone.}  Customers with two products displayed the lowest churn (7.6~\%, n=4,590), whereas those with three or four products showed substantially higher attrition (82.7~\% and 100~\% respectively, with small sample sizes n=266 and n=60).  The pattern suggests that optimal cross‑selling targets two products; portfolio capping at two products and consolidation strategies for customers with single products could improve retention.  Extreme rates for three‑plus products should be interpreted cautiously due to limited sample sizes.
+  \item \textbf{Product portfolio exhibits a Goldilocks effect.} Kaplan–Meier curves revealed that customers with exactly two products displayed the lowest churn rate (7.6\%, n=4,590), whereas those with three or four products showed substantially higher attrition (82.7\% and 100\% respectively, with small sample sizes n=266 and n=60). The Cox model's linear treatment of number of products (HR=1.02) masked this underlying U‑shaped pattern, highlighting the value of non‑parametric survival analysis for uncovering non‑linear relationships.
 
-  \item \textbf{Complaint status creates a trivial prediction problem through extreme feature imbalance.}  Virtually every customer who filed a complaint subsequently exited (99.5\% correlation), making complaint status a near-perfect binary separator.  Following best practices in operational ML \citep{kumar2022customerretention}, complaint status was intentionally excluded to enable genuine feature discovery and actionable business intelligence.  This trade-off sacrifices headline accuracy metrics (85.9\% vs.\ potential 99\%+) to uncover meaningful antecedent patterns that drive real intervention strategies.  Complaint prevention and intervention remain critical but require separate monitoring protocols distinct from predictive modeling.
+  \item \textbf{Feature selection prioritizes actionable intelligence over accuracy.} Complaint status exhibited near‑perfect correlation with churn (r=0.996) but was intentionally excluded from predictive models as a lagging indicator. This methodological decision, which sacrifices potential 99\%+ accuracy for 85.9\%, enables identification of antecedent patterns that drive intervention strategies before customers reach the point of no return.
 \end{enumerate}
 
-These findings are supported by both the survival model and the random forest classifier, reinforcing the validity of the patterns.  Importantly, the risk factors vary in modifiability: age and geography are inherent, whereas number of products and activity status are under managerial control.  Effective retention strategies should therefore prioritise modifiable drivers.
+These findings are supported by both the survival model and the random forest classifier, reinforcing the validity of the patterns across methodological approaches. Importantly, the risk factors vary in modifiability: age and geography are inherent, whereas number of products and activity status are under managerial control. Effective retention strategies should therefore prioritize modifiable drivers.
 
 \subsection{Business Applications and Strategic Implications}
+The statistical findings translate into actionable business intelligence through customer segmentation, targeted interventions, and quantified ROI projections. This section bridges the analytical insights with strategic recommendations for bank management.
 
 \subsubsection{Customer Risk Profiles}
-Using the predicted probabilities from the random forest and SHAP explanations, customers can be segmented into risk tiers (Table~\ref{tab:risk_profiles}).  \textbf{Low‑risk} customers are typically 18–40 years old, active, own one or two products and reside in France or Spain; they have churn probabilities below 20~\%.  \textbf{Medium‑risk} customers are 40–55, inactive or semi‑active, own only one product and have short tenure; their churn probabilities range from 30–60~\%.  \textbf{High‑risk} customers are 55–70, inactive, either under‑serviced (one product) or potentially over‑serviced (three to four products) and often based in Germany; their churn probabilities exceed 70~\%.  Note that customers with three to four products constitute a small subgroup (n=326) and warrant targeted investigation rather than broad assumptions.
+Using the predicted probabilities from the random forest and SHAP explanations, customers can be segmented into risk tiers (Table~\ref{tab:risk_profiles}). \textbf{Low‑risk} customers are typically 18–40 years old, active, own one or two products and reside in France or Spain; they have churn probabilities below 20\%. \textbf{Medium‑risk} customers are 40–55, inactive or semi‑active, own only one product and have short tenure; their churn probabilities range from 30–60\%. \textbf{High‑risk} customers are 55–70, inactive, either under‑serviced (one product) or potentially over‑serviced (three to four products) and often based in Germany; their churn probabilities exceed 70\%. Note that customers with three to four products constitute a small subgroup (n=326) and warrant targeted investigation rather than broad assumptions.
 
 \begin{table}[H]
 \centering
@@ -454,18 +487,18 @@ Using the predicted probabilities from the random forest and SHAP explanations, 
 \end{tabular}
 \end{table}
 
-For each segment, tailored interventions were developed.  Low‑risk customers should be nurtured through personalised offers and loyalty rewards to deepen engagement and encourage adoption of a second product.  Medium‑risk customers benefit from re‑activation campaigns, life‑stage specific offers and product bundles that optimize their portfolio at two products.  High‑risk customers require immediate, high‑touch intervention: dedicated relationship managers, portfolio consolidation, retirement planning services and enhanced support for German clients.  Customers who have already lodged complaints should trigger an escalation protocol separate from the predictive model.
+For each segment, tailored interventions were developed. Low‑risk customers should be nurtured through personalized offers and loyalty rewards to deepen engagement and encourage adoption of a second product. Medium‑risk customers benefit from re‑activation campaigns, life‑stage specific offers and product bundles that optimize their portfolio at two products. High‑risk customers require immediate, high‑touch intervention: dedicated relationship managers, portfolio consolidation, retirement planning services and enhanced support for German clients. Customers who have already lodged complaints should trigger an escalation protocol separate from the predictive model.
 
 \subsubsection{Strategic Recommendations and ROI Analysis}
-Four priority interventions were proposed and costed (Table~\ref{tab:roi_analysis}).  Each intervention targets specific at-risk segments identified through the predictive analysis.
+Four priority interventions were proposed and costed (Table~\ref{tab:roi_analysis}). Each intervention targets specific at-risk segments identified through the predictive analysis.
 
-\textbf{Product portfolio management} focuses on optimizing customers with one product up to the optimal two‑product level, representing 9,674 customers (96.7\% of the dataset).  Research by \citet{singh2024productchurn} analyzing large bank datasets found that customers with exactly two products showed superior retention compared to single‑product customers, suggesting optimal relationship depth.  While the dataset shows high churn rates for customers with three to four products (n=326 total), the small sample sizes limit definitive conclusions about this group; targeted investigation rather than broad policy changes is recommended.
+\textbf{Product portfolio management} focuses on optimizing customers with one product up to the optimal two‑product level, representing 9,674 customers (96.7\% of the dataset). Research by \citet{singh2024productchurn} analyzing large bank datasets found that customers with exactly two products showed superior retention compared to single‑product customers, suggesting optimal relationship depth. While the dataset shows high churn rates for customers with three to four products (n=326 total), the small sample sizes limit definitive conclusions about this group; targeted investigation rather than broad policy changes is recommended.
 
-\textbf{Lifecycle retention program} launches a pre‑retirement engagement program targeting customers aged 50–70, offering complimentary retirement consultations, dedicated relationship managers and premium services.  This demographic represents a critical segment, as research indicates customers aged 50–70 control approximately 65\% of banking wealth and exhibit strong loyalty when properly served \citep{marr2024aging}.  Tailored financial planning services for older adults have been shown to deepen trust and improve retention \citep{ncrc2021agefriendly}.
+\textbf{Lifecycle retention program} launches a pre‑retirement engagement program targeting customers aged 50–70, offering complimentary retirement consultations, dedicated relationship managers and premium services. This demographic represents a critical segment, as research indicates customers aged 50–70 control approximately 65\% of banking wealth and exhibit strong loyalty when properly served \citep{marr2024aging}. Tailored financial planning services for older adults have been shown to deepen trust and improve retention \citep{ncrc2021agefriendly}.
 
-\textbf{Re‑engagement campaign} develops a system to monitor inactivity, trigger personalised communications and deliver incentives or gamified challenges to dormant customers.  Studies demonstrate that personalized, data‑driven engagement campaigns deliver substantially higher ROI (1,344\%) compared to standard campaigns (390\%) \citep{cline2024churn}, while 66\% of banking customers are at risk of attrition due to disengagement \citep{cornerstone2025dormant}.
+\textbf{Re‑engagement campaign} develops a system to monitor inactivity, trigger personalized communications and deliver incentives or gamified challenges to dormant customers. Studies demonstrate that personalized, data‑driven engagement campaigns deliver substantially higher ROI (1,344\%) compared to standard campaigns (390\%) \citep{cline2024churn}, while 66\% of banking customers are at risk of attrition due to disengagement \citep{cornerstone2025dormant}.
 
-\textbf{Germany market localisation} conducts root‑cause research in Germany and addresses the identified issues through localised products, improved language support and competitive pricing.  Multilingual digital banking systems improve customer experience and retention \citep{hunsicker2023multilingual}, while market‑specific competitive pricing directly addresses the service gaps driving attrition \citep{smith2025switching}.
+\textbf{Germany market localization} conducts root‑cause research in Germany and addresses the identified issues through localized products, improved language support and competitive pricing. Multilingual digital banking systems improve customer experience and retention \citep{hunsicker2023multilingual}, while market‑specific competitive pricing directly addresses the service gaps driving attrition \citep{smith2025switching}.
 
 \begin{table}[H]
 \centering
@@ -494,9 +527,9 @@ Localization & localized products & & & \\
 \end{tabular}
 \end{table}
 
-Assuming a conservative average customer lifetime value of \$2,000 \citep{meleis2010clv}, the combined interventions would save approximately 480 customers in the first year, retaining \$960k in revenue.  Industry research supports this CLV estimate, with Oliver Wyman data indicating traditional banks acquire customers at a cost of \$750, resulting in an average lifetime value of \$4,500 \citep{chowdhry2019chime}.  The \$2,000 figure represents a conservative lower bound appropriate for risk assessment.
+Assuming a conservative average customer lifetime value of \$2,000 \citep{meleis2010clv}, the combined interventions would save approximately 480 customers in the first year, retaining \$960k in revenue. Industry research supports this CLV estimate, with Oliver Wyman data indicating traditional banks acquire customers at a cost of \$750, resulting in an average lifetime value of \$4,500 \citep{chowdhry2019chime}. The \$2,000 figure represents a conservative lower bound appropriate for risk assessment.
 
-Total Year~1 investment of \$1.175M would lead to a small net loss (\$215k), but Years~2 and 3 yield annual profits of \$320k as ongoing costs diminish.  This aligns with research showing that retention initiatives targeting existing customers yield 70\% returns compared to 10\% for new‑customer initiatives \citep{browning2024retention}.  Sensitivity analyses suggest that in optimistic scenarios the churn rate reduction could reach 25~\%, whereas pessimistic outcomes might still achieve a 15~\% reduction.  Given the substantial hidden value in complaint prevention and the relatively low risk of the product cap initiative, a phased implementation beginning with high‑ROI actions is recommended.
+Total Year~1 investment of \$1.175M would lead to a small net loss (\$215k), but Years~2 and 3 yield annual profits of \$320k as ongoing costs diminish. This aligns with research showing that retention initiatives targeting existing customers yield 70\% returns compared to 10\% for new‑customer initiatives \citep{browning2024retention}. Sensitivity analyses suggest that in optimistic scenarios the churn rate reduction could reach 25\%, whereas pessimistic outcomes might still achieve a 15\% reduction. Given the substantial hidden value in complaint prevention and the relatively low risk of the product cap initiative, a phased implementation beginning with high‑ROI actions is recommended.
 
 \subsubsection{Implementation Roadmap}
 An implementation roadmap structures the roll‑out over twelve months.  \textbf{Phase~1 (Weeks~1–4)} focuses on quick wins: enforcing the two‑product cap, integrating the predictive model into the customer relationship management system and initiating an audit of complaint drivers.  \textbf{Phase~2 (Months~2–6)} deploys the re‑engagement campaign and pilots the lifecycle program with a subset of pre‑retirement customers.  \textbf{Phase~3 (Months~6–12)} scales the lifecycle program, executes Germany‑specific fixes and retrains the model with new data.  Continuous monitoring of model performance and retention metrics ensures that interventions can be adjusted dynamically.

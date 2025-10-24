@@ -309,7 +309,7 @@ This project extends the survival analysis + ML methodology with several technic
 6. **4-Stage Sequential Grid Search** - 73 hyperparameter combinations tested with class weight optimization
 7. **3-Method Feature Validation** - Built-in importance + Permutation + SHAP for robust interpretation
 8. **Automated Reporting Pipeline** - Plot generation script for reproducible executive summaries
-9. **Business-Focused Documentation** - 40-50 page executive summary with ROI projections and implementation roadmap
+9. **Business-Focused Documentation** - 20-30 page academic research report with ROI projections and implementation roadmap
 10. **Model Validation** - Comprehensive experiments validate Random Forest + class_weight + baseline features as optimal configuration
 
 ---

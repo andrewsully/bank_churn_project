@@ -68,9 +68,7 @@ bank_churn_project/
 │
 ├── research_report.pdf
 ├── research_report/
-│   ├── research_report.tex
-│   ├── references.bib
-│   └── compile.sh
+│   └── (LaTeX source files)
 │
 ├── generate_executive_plots.py
 ├── EXECUTIVE_SUMMARY.md

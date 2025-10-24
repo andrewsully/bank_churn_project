@@ -64,7 +64,13 @@ bank_churn_project/
 │       └── advanced_modeling_utils.py
 │
 ├── img/
-│   └── (25 visualization PNG files)
+│   └── (56 visualization PNG files)
+│
+├── research_report.pdf
+├── research_report/
+│   ├── research_report.tex
+│   ├── references.bib
+│   └── compile.sh
 │
 ├── generate_executive_plots.py
 ├── EXECUTIVE_SUMMARY.md

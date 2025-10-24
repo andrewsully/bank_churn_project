@@ -17,9 +17,17 @@
 \usepackage{subcaption}
 \usepackage{xcolor}
 \usepackage{colortbl}
+\usepackage{fancyhdr}
 
 % Set reasonable margins for a professional report
 \geometry{margin=1in}
+
+% Configure running headers
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{gray}{\nouppercase{\leftmark}}}
+\fancyhead[R]{\textcolor{gray}{\thepage}}
+\renewcommand{\headrulewidth}{0pt}
 
 % Configure hyperlinks
 \hypersetup{
@@ -50,19 +58,24 @@
   
   \vfill
 \end{titlepage}
+\thispagestyle{plain}
 
 \newpage
+\thispagestyle{plain}
 \begin{abstract}
 Customer retention has emerged as a strategic priority for banks amid intensifying competition, shrinking margins, and rising digital expectations. Using 10,000 retail-banking records, this study integrates exploratory analysis, survival modeling, and machine learning to explain and predict churn. Building on prior survival-analysis work, this study quantifies risk factors, estimates time to churn, and delivers a Random Forest classifier with 85.9\% accuracy for proactive risk scoring. Inactivity, product-portfolio imbalance, and lifecycle stage dominate risk; inactive members face 1.88× higher churn. Combining Kaplan–Meier and Cox models with interpretable ensemble methods provides both temporal and probabilistic insights, enabling targeted re-engagement campaigns, lifecycle retention programs, and portfolio optimization.
 \end{abstract}
 
 \newpage
 \pagenumbering{roman}
+\pagestyle{plain}
 \tableofcontents
 \newpage
 \pagenumbering{arabic}
+\pagestyle{fancy}
 
 \section{Introduction}
+\markboth{INTRODUCTION}{}
 Customer churn, the process by which customers close accounts or cease doing business with a firm, is a critical concern for banks. On average, acquiring a new customer can cost five to seven times more than retaining an existing one \citep{businessbuilders2024cost}, and even modest improvements in retention can yield disproportionate profit increases \citep{kumar2022customerretention}. For many financial institutions, high churn rates translate into substantial losses in lifetime value. Effective churn management therefore requires not only understanding who leaves and when, but also why they leave and how the bank can intervene.
 
 Using a rich dataset of ten thousand customers made publicly available by \citet{kollipara2022bank}, this study investigates demographic, behavioral and financial attributes to determine how they contribute to attrition. The analysis employs survival analysis and machine learning techniques to estimate individual churn probabilities and design targeted retention programs. Specifically, this study conducts exploratory data analysis to identify predictive factors, quantifies time‑to‑churn patterns using Kaplan–Meier estimators and Cox proportional hazards models, builds a random forest classifier for proactive risk scoring, validates model performance against alternative algorithms, and translates statistical findings into actionable business recommendations with quantified ROI. The methods and insights presented here demonstrate an integrated approach to analytics‑driven customer retention applicable to similar banking contexts.
@@ -77,6 +90,7 @@ However, traditional classification approaches, while effective at answering \em
 This study bridges these gaps by combining survival analysis methodology with comparative ML evaluation and strategic business planning. The analysis extends the findings of \citet{singh2024productchurn} through several methodological contributions: (1) incorporation of Kaplan–Meier survival curves and Cox proportional hazards modeling to quantify temporal churn patterns; (2) systematic comparison of SMOTE oversampling versus class-weight balancing strategies; (3) application of SHAP values and partial dependence plots for granular model interpretability; and (4) translation of statistical findings into quantified ROI projections and phased implementation strategies.
 
 \section{Methods}
+\markboth{METHODS}{}
 This section describes the data sources, preprocessing procedures, statistical methods, and model development approaches employed in the analysis. The methodology encompasses three main components: exploratory data analysis to identify patterns and guide feature selection, survival analysis to quantify temporal churn patterns, and predictive modeling to develop actionable risk scoring tools.
 
 \subsection{Dataset and Pre‑Processing}
@@ -126,6 +140,7 @@ The Random Forest classifier was compared against two gradient‑boosting altern
 Additionally, experiments evaluated synthetic minority oversampling (SMOTE) versus class-weight balancing strategies, and tested whether engineered features (interaction terms and polynomial expansions) improved performance beyond tree-based algorithms' inherent capacity to capture non-linear interactions.
 
 \section{Results}
+\markboth{RESULTS}{}
 \subsection{Exploratory Data Analysis}
 Exploratory data analysis was conducted to characterize the dataset, identify baseline churn patterns, and guide feature selection decisions. This initial investigation revealed several striking patterns that informed subsequent survival analysis and predictive modeling approaches.
 
@@ -440,6 +455,7 @@ To ensure robustness, the random forest was compared against two gradient‑boos
 \end{figure}
 
 \section{Discussion}
+\markboth{DISCUSSION}{}
 \subsection{Key Findings}
 The combined analyses integrating survival analysis and machine learning yielded several actionable insights:
 
